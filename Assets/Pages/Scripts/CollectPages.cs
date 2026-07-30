@@ -1,9 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CollectPages : MonoBehaviour
 {
+    public PageSelector pageSelector;
+    private Renderer pageRenderer;
+ 
     public GameObject collectText;
 
     public AudioSource collectSound;
@@ -11,37 +12,45 @@ public class CollectPages : MonoBehaviour
     private GameObject page;
 
     private bool inReach;
+    [SerializeField, ReadOnly] private bool playerInArea;
 
-    private GameObject gameLogic;
-
+    private GameObject gameLogicGO;
+    private GameLogic gameLogic;
 
     void Start()
     {
         collectText.SetActive(false);
 
         inReach = false;
+        playerInArea = false;
 
-        gameLogic = GameObject.FindWithTag("GameLogic");
+        gameLogicGO = GameObject.FindWithTag("GameLogic");
+        gameLogic = gameLogicGO.GetComponent<GameLogic>();
 
         page = this.gameObject;
-        
+        pageRenderer = page.GetComponent<Renderer>();
     }
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Reach")
-        {
+        if (playerInArea && other.gameObject.CompareTag("Reach")) {
             inReach = true;
             collectText.SetActive(true);
+        }
+        if (other.gameObject.CompareTag("Player")) {
+            pageRenderer.material = pageSelector.textures[gameLogic.pageCount];
+            playerInArea = true;
         }
     }
 
     void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.tag == "Reach")
-        {
+        if (playerInArea && other.gameObject.CompareTag("Reach")) {
             inReach = false;
             collectText.SetActive(false);
+        }
+        if (other.gameObject.CompareTag("Player")) {
+            playerInArea = false;
         }
     }
 
@@ -49,13 +58,11 @@ public class CollectPages : MonoBehaviour
     {
         if(inReach && Input.GetButtonDown("pickup"))
         {
-            gameLogic.GetComponent<GameLogic>().pageCount += 1;
+            gameLogic.AddPage();
             collectSound.Play();
             collectText.SetActive(false);
             page.SetActive(false);
             inReach = false;
         }
-
-        
     }
 }

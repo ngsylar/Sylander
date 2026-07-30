@@ -13,6 +13,9 @@ public class PauseMenu : MonoBehaviour
 
     private bool isPaused = false; // Flag to track if the game is paused
 
+    public SlenderPlayerController playerController; // Reference to the player's controller
+    public Flashlight flashlight;
+
     void Start()
     {
         // Add a listener to the exit and restart button
@@ -53,6 +56,10 @@ public class PauseMenu : MonoBehaviour
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
+        // Freeze the player's movement
+        playerController.IsPaused = true;
+        flashlight.IsPaused = true;
+
         // Optional: Disable any other scripts that should not run while paused
         // Example: Disable player movement scripts, etc.
     }
@@ -68,6 +75,10 @@ public class PauseMenu : MonoBehaviour
         // Hide and lock the cursor (optional: you can choose to lock the cursor back to locked state)
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+
+        // Free the player's movement
+        playerController.IsPaused = false;
+        flashlight.IsPaused = false;
 
         // Re-enable any scripts disabled when paused
     }
