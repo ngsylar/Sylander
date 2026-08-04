@@ -1,10 +1,8 @@
 using UnityEngine;
-using UnityEngine.Video;
-using UnityEngine.SceneManagement;
-using System.Collections;
 
 public class SlenderManAI : MonoBehaviour
 {
+    private static readonly int _classSlenderId = 0;
     private static readonly WaitForSeconds _waitForSeconds5 = new(5f);
     
     public SlendermanChase chaser;
@@ -22,28 +20,16 @@ public class SlenderManAI : MonoBehaviour
     public AudioClip teleportSound; // Reference to the teleport sound effect
     private AudioSource audioSource;
 
-    public GameObject staticObject; // Reference to the "static" GameObject
     private float staticActivationRange; // Range at which "static" should be activated
     public float deathActivationRange; // 3f // Range at which death should be activated
-    public VideoClip staticVideo; // Reference to the static video
-    public VideoClip deathVideo; // Reference to the death video
-    public Material staticMaterial; // Reference to the static material (Fade)
-    public Material deathMaterial; // Reference to the death material (Opaque)
 
     private Vector3 baseTeleportSpot;
     private float teleportTimer = 0f;
     private int teleportTrials = 0;
 
-    private bool isDeathVideoPlaying = false; // Flag to check if death video is playing
-
     private SlenderPlayerController playerController; // Reference to the player's controller
-    private VideoPlayer videoPlayer;
-    private Renderer staticRenderer; // Reference to the renderer of the static object
     private GameLogic gameLogic; // Reference to the game logic script
     private int lastPageCount = -1;
-
-    public GameObject deathUI;
-    public GameObject victoryUI;
 
     [Header("Dinamic Things")]
     public GameObject metal0;
@@ -60,6 +46,16 @@ public class SlenderManAI : MonoBehaviour
     public float InterferenceMax
     {
         get => teleportMinDistance;
+    }
+
+    public float StaticAlphaMin
+    {
+        get => staticAlphaMin;
+    }
+
+    public float StaticAlphaMax
+    {
+        get => staticAlphaMax;
     }
 
     public float DistanceToPlayer
@@ -85,10 +81,10 @@ public class SlenderManAI : MonoBehaviour
         set => chaser.chaseSprintDuration = value;
     }
 
-    public float DistanceToStop
+    public float DistanceToEscape
     {
-        get => chaser.stopDistance;
-        set => chaser.stopDistance = value;
+        get => chaser.escapeDistance;
+        set => chaser.escapeDistance = value;
     }
 
     public bool IsChasing
@@ -102,46 +98,28 @@ public class SlenderManAI : MonoBehaviour
 
         UpdateActivationRange();
 
-        // Get or add an AudioSource component
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
-
-        // Set the teleport sound
-        audioSource.clip = teleportSound;
-        audioSource.volume = 0.3f;
-
-        // Ensure the "static" object is initially turned off
-        if (staticObject != null)
-        {
-            staticObject.SetActive(false);
-        }
+        // SetupTeleportSound();
 
         // Get reference to the player's controller
         playerController = player.GetComponent<SlenderPlayerController>();
 
-        // Get the VideoPlayer component from the static object
-        if (staticObject != null)
-        {
-            videoPlayer = staticObject.GetComponent<VideoPlayer>();
-            staticRenderer = staticObject.GetComponent<Renderer>();
-            videoPlayer.clip = staticVideo; // Set the initial video clip to the static video
-
-            // Register for the video end event
-            videoPlayer.loopPointReached += OnVideoEnd;
-        }
-
         // Get reference to the game logic script
         gameLogic = GameObject.FindWithTag("GameLogic").GetComponent<GameLogic>();
-
-        //Show the no escape UI
-        victoryUI.SetActive(true);
-        StartCoroutine(NoEscapeUI());
     }
 
-    public void UpdateActivationRange ()
+    void SetupTeleportSound()
+    {
+        // Get or add an AudioSource component
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
+
+        // Set the teleport sound
+        audioSource.clip = teleportSound;
+        audioSource.volume = 0.3f;
+    }
+
+    public void UpdateActivationRange()
     {
         staticActivationRange = chaser.DetectionRadius;
     }
@@ -150,8 +128,8 @@ public class SlenderManAI : MonoBehaviour
     {
         if (player == null) return;
 
-        if (isDeathVideoPlaying) {
-            // Freeze the player's movement
+        // Freeze the player's movement
+        if (gameLogic.IsDeathVideoPlaying) {
             playerController.canMove = false;
             return;
         }
@@ -170,8 +148,7 @@ public class SlenderManAI : MonoBehaviour
         if (IsChasing) adjustedCooldown *= 1.5f;
         teleportTimer += Time.deltaTime;
 
-        if (teleportTimer >= adjustedCooldown)
-        {
+        if (teleportTimer >= adjustedCooldown) {
             teleportTimer = 0;
             DecideTeleportAction();
         }
@@ -180,87 +157,16 @@ public class SlenderManAI : MonoBehaviour
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
         // Check player distance and toggle the "static" object accordingly
-        if (distanceToPlayer <= deathActivationRange)
-        {
-            // Play the death video and adjust the material and scale
-            if (videoPlayer != null && videoPlayer.clip != deathVideo)
-            {
-                isDeathVideoPlaying = true;
-                videoPlayer.clip = deathVideo;
-                staticRenderer.material = deathMaterial;
-                videoPlayer.SetDirectAudioMute(0, false); // Unmute audio
-                videoPlayer.Play();
-
-                // Adjust the scale of the static object for the death video
-                staticObject.transform.localScale = new Vector3(1.28f, 0.72f, 1f);
-            }
+        if (distanceToPlayer <= deathActivationRange) {
+            gameLogic.KeepDeathVideo();
         }
-        else if (distanceToPlayer <= staticActivationRange)
-        {
-            if (staticObject != null && !staticObject.activeSelf)
-            {
-                staticObject.SetActive(true);
-            }
-
-            // Play the static video and reset the material and scale
-            if (videoPlayer != null && videoPlayer.clip != staticVideo)
-            {
-                videoPlayer.clip = staticVideo;
-                videoPlayer.SetDirectAudioMute(0, true); // Mute audio for static video
-                videoPlayer.Play();
-
-                // Reset the scale of the static object for the static video
-                staticObject.transform.localScale = new Vector3(1f, 1f, 1f); // Adjust as needed
-            }
-
-            float t = Mathf.InverseLerp(InterferenceMin, InterferenceMax, distanceToPlayer);
-            float alpha = Mathf.Lerp(staticAlphaMin, staticAlphaMax, t);
-
-            Color color = staticMaterial.color;
-            color.a = alpha;
-            staticMaterial.color = color;
-        }
-        else
-        {
-            if (staticObject != null && staticObject.activeSelf)
-            {
-                staticObject.SetActive(false);
-            }
-        }
-    }
-
-    private void OnVideoEnd(VideoPlayer vp)
-    {
-        if (vp.clip == deathVideo)
-        {
-            // Show the death UI when the death video ends
-            deathUI.SetActive(true);
-
-            // Restart the game
-            StartCoroutine(RestartAndResetDeathUI());
-        }
-    }
-
-    private IEnumerator NoEscapeUI(){
-        yield return _waitForSeconds5;
-        victoryUI.SetActive(false);
-    }
-
-    private IEnumerator RestartAndResetDeathUI()
-    {
-        // Wait for a few seconds
-        yield return _waitForSeconds5; // Adjust the time as needed
-
-        // Restart the game
-        RestartGame();
-
-        // Reset the death UI to inactive
-        deathUI.SetActive(false);
-    }
-
-    public void RestartGame()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        else if (distanceToPlayer <= staticActivationRange) {
+            gameLogic.KeepStaticVideo(
+                _classSlenderId,
+                InterferenceMin, InterferenceMax, distanceToPlayer,
+                staticAlphaMin, staticAlphaMax
+            );
+        } else gameLogic.StopVideo(_classSlenderId);
     }
 
     private void UpdateAggressiveness(int pageCount)
@@ -270,7 +176,7 @@ public class SlenderManAI : MonoBehaviour
 
         if (pageCount == 8)
         {
-            SceneManager.LoadScene(0);
+            // SceneManager.LoadScene(0);
             return;
         }
 
@@ -288,7 +194,7 @@ public class SlenderManAI : MonoBehaviour
 
         // --- CHASE ---
         DistanceToChase = Mathf.Lerp(12f, 9f, curve);          // diminui levemente
-        DistanceToStop  = Mathf.Lerp(10f, 13f, curve);         // sempre maior que chase
+        DistanceToEscape  = Mathf.Lerp(10f, 13f, curve);         // sempre maior que chase
 
         ChaseSpeed = Mathf.Lerp(4f, 5f, curve);
 
@@ -333,7 +239,7 @@ public class SlenderManAI : MonoBehaviour
     #if UNITY_EDITOR
         Debug.Log(
             $"[Page {pageCount}] " +
-            $"ChaseDist: {DistanceToChase:F1} | StopDist: {DistanceToStop:F1} | " +
+            $"ChaseDist: {DistanceToChase:F1} | EscapeDist: {DistanceToEscape:F1} | " +
             $"Speed: {ChaseSpeed:F1} | TP: {teleportMinDistance:F1}-{teleportMaxDistance:F1} | " +
             $"CD: {teleportCooldown:F1} | Prob: {teleportProbability:F2}"
         );

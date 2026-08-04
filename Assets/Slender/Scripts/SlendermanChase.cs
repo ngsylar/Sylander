@@ -8,7 +8,7 @@ public class SlendermanChase : MonoBehaviour
     public float flashlightInterferenceRadius;  // 16f
     public float playerDetectionRadius;         // 12f // Radius within which the NPC detects the player
     public float approachSpeed;                 // 4.8f // Speed at which the NPC approaches the player
-    public float stopDistance;                  // 12f // Distance at which the NPC stops moving towards the player
+    public float escapeDistance;                // 12f // Distance at which the chasing NPC stops moving towards the player
     public float killDistance;                  // 1f // Distance at which the NPC kills the player
     public float chaseSprintDuration;           // 3f
     private float chaseSprintTime = 0f;
@@ -75,7 +75,7 @@ public class SlendermanChase : MonoBehaviour
             distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
             // Check if the player is within the detection radius
-            isPlayerInRange = distanceToPlayer <= (isPlayerInRange ? stopDistance : playerDetectionRadius);
+            isPlayerInRange = distanceToPlayer <= (isPlayerInRange ? escapeDistance : playerDetectionRadius);
 
             // If the player is in range, move towards the player
             if (isPlayerInRange) {
@@ -100,7 +100,7 @@ public class SlendermanChase : MonoBehaviour
         float chaseSpeed = Mathf.Lerp(0.5f, approachSpeed, t);
 
         // Move towards the player if further than the stop distance
-        if ((distanceToPlayer > killDistance) || (distanceToPlayer > stopDistance))
+        if ((distanceToPlayer > killDistance) || (distanceToPlayer > escapeDistance))
         {
             float inertiaFactor = 1f;
             if (inertia) {
