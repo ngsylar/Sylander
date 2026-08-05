@@ -7,28 +7,40 @@ public class MirageDetector : MonoBehaviour
 
     private MeshCollider meuMeshCollider;
     private bool estavaDentro = false;
+    private Collider colliderAtual = null;
 
     public JumpscareMgmt flashlightPyramid;
 
     void Start()
     {
         meuMeshCollider = GetComponent<MeshCollider>();
+
+        // Força a reconstrução do MeshCollider caso a malha tenha sido alterada
+        if (meuMeshCollider != null) {
+            Mesh mesh = meuMeshCollider.sharedMesh;
+            meuMeshCollider.sharedMesh = null;
+            meuMeshCollider.sharedMesh = mesh;
+        }
     }
 
     void Update()
     {
-        if (meuMeshCollider == null) return;
+        if (meuMeshCollider == null || meuMeshCollider.sharedMesh == null)
+            return;
+
+        // Usa os bounds atuais do collider
+        Bounds bounds = meuMeshCollider.bounds;
 
         // 1. Faz uma checagem rápida ao redor da pirâmide para achar o objeto parado
         Collider[] colisoresProximos = Physics.OverlapBox(
-            transform.position, 
-            meuMeshCollider.bounds.extents, 
+            bounds.center,
+            bounds.extents,
             transform.rotation, 
             layerAlvo
         );
 
         bool estaColidindoMeshExato = false;
-        Collider other = new Collider();
+        Collider outroAtual = null;
 
         // 2. Se achou o objeto por perto, testa a geometria exata da pirâmide contra ele
         foreach (Collider outroCollider in colisoresProximos)
@@ -43,22 +55,21 @@ public class MirageDetector : MonoBehaviour
                 out direcao, out distancia
             );
 
-            if (encostouDeVerdade)
-            {
+            if (encostouDeVerdade) {
                 estaColidindoMeshExato = true;
-                other = outroCollider;
+                outroAtual = outroCollider;
                 break;
             }
         }
 
         // 3. Gerencia o Trigger Enter de forma precisa
-        if (estaColidindoMeshExato && !estavaDentro)
-        {
-            OnCustomEnter(other);
+        if (estaColidindoMeshExato && !estavaDentro) {
+            colliderAtual = outroAtual;
+            OnCustomEnter(colliderAtual);
         }
-        else if (!estaColidindoMeshExato && estavaDentro)
-        {
-            OnCustomExit(other);
+        else if (!estaColidindoMeshExato && estavaDentro) {
+            OnCustomExit(colliderAtual);
+            colliderAtual = null;
         }
 
         estavaDentro = estaColidindoMeshExato;
@@ -66,7 +77,7 @@ public class MirageDetector : MonoBehaviour
 
     void OnCustomEnter (Collider other)
     {
-        if (other.gameObject.CompareTag("SlenderMirage")) {
+        if (other != null && other.gameObject.CompareTag("SlenderMirage")) {
             flashlightPyramid.MakeJumpscare(other.GetComponent<SlenderMirage>());
         }
     }

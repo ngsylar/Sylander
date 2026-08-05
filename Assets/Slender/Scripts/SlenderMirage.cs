@@ -4,6 +4,7 @@ public class SlenderMirage : MonoBehaviour
 {
     private static readonly int _classSlenderId = 1;
     private GameLogic gameLogic;
+    private Collider capsuleCollider;
 
     public Transform player; // Reference to the player's GameObject
     [SerializeField, ReadOnly] private float distanceToPlayer = 999f;
@@ -19,9 +20,20 @@ public class SlenderMirage : MonoBehaviour
     public float escapeDistance;        // 8f
 
     public JumpscareMgmt jumpscareMgmt;
+    [SerializeField] private int maxJumpscares = 4;
+    [SerializeField] private int maxJumpsPerPage = 2;
     [SerializeField, ReadOnly] private int jumpscaresDone = 0;
-    [SerializeField] private int maxJumpscares = 3;
+    [SerializeField, ReadOnly] private int jumpsPerPageDone = 0;
     [SerializeField, ReadOnly] private float jumpscareChance = 0f;
+    [SerializeField, ReadOnly] private int lastJumpscarePage = -1;
+    [SerializeField] private float trialCooldown = 10f;
+    [SerializeField] private float jumpscareCooldown = 90f;
+    [SerializeField, ReadOnly] private float currentJumpTime = 0f;
+    private bool permitVideo = false;
+
+    [SerializeField] private float hideTime = 5f; 
+    [SerializeField, ReadOnly] private float currentHideTime = 0f;
+    [SerializeField] private float hideVelocity;
 
     public float InterferenceMin
     {
@@ -46,6 +58,7 @@ public class SlenderMirage : MonoBehaviour
     void Start()
     {
         gameLogic = GameObject.FindWithTag("GameLogic").GetComponent<GameLogic>();
+        capsuleCollider = gameObject.GetComponent<CapsuleCollider>();
         baseTeleportSpot = transform.position;
     }
 
@@ -65,6 +78,7 @@ public class SlenderMirage : MonoBehaviour
             JumpscareTrial();
         
         HandleStaticVideo();
+        HandleHideMirage();
     }
 
     private void RotateTowardsPlayer()
@@ -80,8 +94,13 @@ public class SlenderMirage : MonoBehaviour
 
     private void JumpscareTrial()
     {
-        if (gameLogic.pageCount < 1 || gameLogic.pageCount > 4 || jumpscaresDone >= maxJumpscares)
+        if (jumpscaresDone >= maxJumpscares
+            || gameLogic.pageCount < 1 || gameLogic.pageCount > 4
+            || jumpsPerPageDone >= maxJumpsPerPage)
             return;
+
+        currentJumpTime -= Time.deltaTime;
+        if (currentJumpTime > 0f) return;
         
         float baseChance;
         float increment;
@@ -110,7 +129,9 @@ public class SlenderMirage : MonoBehaviour
         if (Random.value <= jumpscareChance) {
             TeleportNearPlayer();
         } else {
+            currentJumpTime = trialCooldown;
             jumpscareChance += increment;
+            jumpscareChance = Mathf.Min(jumpscareChance + increment, 0.50f);
         }
     }
 
@@ -131,8 +152,11 @@ public class SlenderMirage : MonoBehaviour
     private void TeleportToBaseSpot()
     {
         if (transform.position != baseTeleportSpot) {
+            if (!capsuleCollider.enabled) capsuleCollider.enabled = true;
             transform.position = baseTeleportSpot;
             gameLogic.StopVideo(_classSlenderId);
+            currentHideTime = 0f;
+            permitVideo = false;
         }
     }
 
@@ -140,6 +164,15 @@ public class SlenderMirage : MonoBehaviour
     {
         jumpscaresDone++;
         jumpscareChance = 0f;
+
+        if (lastJumpscarePage != gameLogic.pageCount) {
+            currentJumpTime = jumpscareCooldown;
+            jumpsPerPageDone = 0;
+        }
+        lastJumpscarePage = gameLogic.pageCount;
+        jumpsPerPageDone++;
+
+        permitVideo = true;
     }
 
     void HandleStaticVideo()
@@ -149,6 +182,7 @@ public class SlenderMirage : MonoBehaviour
             gameLogic.StopVideo(_classSlenderId);
             return;
         }
+        if (!permitVideo) return;
         if (distanceToPlayer <= StaticActivationRange) {
             gameLogic.KeepStaticVideo(
                 _classSlenderId,
@@ -156,5 +190,20 @@ public class SlenderMirage : MonoBehaviour
                 slenderman.StaticAlphaMin, slenderman.StaticAlphaMax
             );
         } else gameLogic.StopVideo(_classSlenderId);
+    }
+
+    void HandleHideMirage()
+    {
+        if (transform.position == baseTeleportSpot || jumpscareChance != 0f)
+            return;
+        
+        currentHideTime += Time.deltaTime;
+        if (currentHideTime >= hideTime || distanceToPlayer <= escapeDistance) {
+            if (capsuleCollider.enabled) capsuleCollider.enabled = false;
+            transform.position -= hideVelocity * Time.deltaTime * transform.forward;
+            currentHideTime = hideTime;
+        }
+        if (currentHideTime > 0f && distanceToPlayer >= securityDistance)
+            TeleportToBaseSpot();
     }
 }
