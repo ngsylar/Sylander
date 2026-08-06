@@ -13,7 +13,7 @@ public class SlenderManAI : MonoBehaviour
     public float teleportCooldown; // 12f // Base time between teleportation attempts
     public float teleportProbability; // 0.02f // Base probability of chasing the player
     public float rotationSpeed = 5f; // Rotation speed when looking at the player
-    public int maxTeleportsPerChase; // 2
+    public int maxTeleportsPerChase; // 0
 
     private int teleportsThisChase = 0;
 
@@ -31,12 +31,13 @@ public class SlenderManAI : MonoBehaviour
     private GameLogic gameLogic; // Reference to the game logic script
     private int lastPageCount = -1;
 
+    // [Header("Post Escape")]
+    // [SerializeField] private float postEscapeTeleportCooldown = 12f;
+    // [SerializeField, ReadOnly] private float postEscapeTimer = 0f;
+
     [Header("Dinamic Things")]
-    public GameObject metal0;
-    public GameObject metal1;
     public float staticAlphaMin;
     public float staticAlphaMax;
-    public float initialStaticVolume;
 
     public float InterferenceMin
     {

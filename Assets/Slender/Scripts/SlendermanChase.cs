@@ -95,6 +95,7 @@ public class SlendermanChase : MonoBehaviour
                 staticNoise.Stop();
                 inertia = false;
                 ResetSprint();
+                // sylar: aqui a perseguicao eh concluida com escape de sucesso
             } else SlowChase(distanceToPlayer);
         }
     }
@@ -111,7 +112,7 @@ public class SlendermanChase : MonoBehaviour
         float chaseSpeed = Mathf.Lerp(0.5f, approachSpeed, t);
 
         // Move towards the player if further than the stop distance
-        if ((distanceToPlayer > killDistance) || (distanceToPlayer > escapeDistance))
+        if (distanceToPlayer > killDistance)
         {
             float inertiaFactor = 1f;
             if (inertia) {
