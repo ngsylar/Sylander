@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Flashlight : MonoBehaviour
@@ -7,6 +6,8 @@ public class Flashlight : MonoBehaviour
     public SlenderManAI slenderman;
     public GameObject slendermetal0;
     public GameObject slendermetal1;
+    public GameObject slendermirage0;
+    public GameObject slendermirage1;
 
     public GameObject flashlight;
     private Light lightComp;
@@ -102,8 +103,7 @@ public class Flashlight : MonoBehaviour
         if (debugMode) {
             RenderSettings.ambientLight = new Color(worldLightDebug, worldLightDebug, worldLightDebug);
             RenderSettings.fogDensity = 0f;
-            slendermetal0.SetActive(true);
-            slendermetal1.SetActive(false);
+            TurnMetal0();
         }
         #endif
     }
@@ -145,8 +145,7 @@ public class Flashlight : MonoBehaviour
         lightComp.intensity = lightIntensityCurrent;
         RenderSettings.ambientLight = new Color(worldLightCurrent, worldLightCurrent, worldLightCurrent);
         RenderSettings.fogDensity = fogDensityCurrent;
-        slendermetal0.SetActive(false);
-        slendermetal1.SetActive(true);
+        TurnMetal1();
     }
 
     void LightsOff (bool playSound=true)
@@ -159,8 +158,7 @@ public class Flashlight : MonoBehaviour
 
         RenderSettings.ambientLight = new Color(worldLightOff, worldLightOff, worldLightOff);
         RenderSettings.fogDensity = fogDensityOff;
-        slendermetal0.SetActive(true);
-        slendermetal1.SetActive(false);
+        TurnMetal0();
     }
 
     void DrainBattery ()
@@ -253,5 +251,21 @@ public class Flashlight : MonoBehaviour
         if (currentBattery <= 0.5f) return 0.3f;
         if (currentBattery <= 0.8f) return 0.1f;
         return 0f;
+    }
+
+    void TurnMetal0()
+    {
+        slendermetal0.SetActive(true);
+        slendermetal1.SetActive(false);
+        slendermirage0.SetActive(true);
+        slendermirage1.SetActive(false);
+    }
+
+    void TurnMetal1()
+    {
+        slendermetal0.SetActive(false);
+        slendermetal1.SetActive(true);
+        slendermirage0.SetActive(false);
+        slendermirage1.SetActive(true);
     }
 }

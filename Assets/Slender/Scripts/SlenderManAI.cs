@@ -158,7 +158,7 @@ public class SlenderManAI : MonoBehaviour
 
         // Check player distance and toggle the "static" object accordingly
         if (distanceToPlayer <= deathActivationRange) {
-            gameLogic.KeepDeathVideo();
+            gameLogic.KeepDeathVideo(!chaser.IsChaseSoundPlaying);
         }
         else if (distanceToPlayer <= staticActivationRange) {
             gameLogic.KeepStaticVideo(
@@ -339,6 +339,7 @@ public class SlenderManAI : MonoBehaviour
             Debug.Log($"Teleported | Dist: {teleportDistance:F1} | InView: {inView} | Bias: {bias:F2}");
             #endif
         }
+        chaser.JumpscareHandler.ResetRealJumpscare();
     }
 
     private void TeleportToBaseSpot()

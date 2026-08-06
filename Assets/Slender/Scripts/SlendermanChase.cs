@@ -4,6 +4,7 @@ using UnityEngine;
 public class SlendermanChase : MonoBehaviour
 {
     public AudioSource staticNoise;
+    public JumpscareMgmt jumpscareMgmt;
 
     public float flashlightInterferenceRadius;  // 16f
     public float playerDetectionRadius;         // 12f // Radius within which the NPC detects the player
@@ -31,6 +32,11 @@ public class SlendermanChase : MonoBehaviour
         get => controller;
     }
 
+    public JumpscareMgmt JumpscareHandler
+    {
+        get => jumpscareMgmt;
+    }
+
     public float DetectionRadius
     {
         get => playerFlashlight.IsOn ? flashlightInterferenceRadius : playerDetectionRadius;
@@ -44,6 +50,11 @@ public class SlendermanChase : MonoBehaviour
     public bool IsChasing
     {
         get => inertia;
+    }
+
+    public bool IsChaseSoundPlaying
+    {
+        get => staticNoise.isPlaying;
     }
 
     void Start()
@@ -143,6 +154,9 @@ public class SlendermanChase : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Building")) {
             inHouse = true;
+        }
+        else if (other.gameObject.CompareTag("Pyramid")) {
+            jumpscareMgmt.MakeRealJumpscare();
         }
     }
 

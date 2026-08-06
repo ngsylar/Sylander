@@ -26,14 +26,14 @@ public class SlenderMirage : MonoBehaviour
     [SerializeField, ReadOnly] private int jumpsPerPageDone = 0;
     [SerializeField, ReadOnly] private float jumpscareChance = 0f;
     [SerializeField, ReadOnly] private int lastJumpscarePage = -1;
-    [SerializeField] private float trialCooldown = 10f;
-    [SerializeField] private float jumpscareCooldown = 90f;
+    [SerializeField] private float trialCooldown; // 20f
+    [SerializeField] private float jumpscareCooldown; // 120f
     [SerializeField, ReadOnly] private float currentJumpTime = 0f;
     private bool permitVideo = false;
 
-    [SerializeField] private float hideTime = 5f; 
+    [SerializeField] private float hideTime; // 4f 
     [SerializeField, ReadOnly] private float currentHideTime = 0f;
-    [SerializeField] private float hideVelocity;
+    [SerializeField] private float hideVelocity; // 150f
 
     public float InterferenceMin
     {

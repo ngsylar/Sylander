@@ -7,6 +7,7 @@ using TMPro; // Import the TextMeshPro namespace
 public class GameLogic : MonoBehaviour
 {
     private static readonly WaitForSeconds _waitForSeconds5 = new(5f);
+    public BackgroundMgmt bgMusic;
 
     public GameObject counter;
     public int pageCount;
@@ -48,6 +49,7 @@ public class GameLogic : MonoBehaviour
     {
         pageCount++;
         UpdateUI();
+        bgMusic.UpdateMusic(pageCount);
     }
 
     void UpdateUI()
@@ -104,7 +106,7 @@ public class GameLogic : MonoBehaviour
         staticMaterial.color = color;
     }
 
-    public void KeepDeathVideo()
+    public void KeepDeathVideo(bool screamNoise)
     {
         // Play the death video and adjust the material and scale
         if (videoPlayer != null && videoPlayer.clip != deathVideo) {
@@ -116,6 +118,7 @@ public class GameLogic : MonoBehaviour
 
             // Adjust the scale of the static object for the death video
             staticObject.transform.localScale = new Vector3(1.28f, 0.72f, 1f);
+            if (screamNoise) bgMusic.PlayScreamSound();
         }
     }
 
