@@ -15,6 +15,12 @@ public class PauseMenu : MonoBehaviour
 
     public SlenderPlayerController playerController; // Reference to the player's controller
     public Flashlight flashlight;
+    public Footsteps footsteps;
+
+    public bool IsPaused
+    {
+        get => isPaused;
+    }
 
     void Start()
     {
@@ -59,6 +65,7 @@ public class PauseMenu : MonoBehaviour
         // Freeze the player's movement
         playerController.IsPaused = true;
         flashlight.IsPaused = true;
+        footsteps.IsPaused = true;
 
         // Optional: Disable any other scripts that should not run while paused
         // Example: Disable player movement scripts, etc.
@@ -79,6 +86,7 @@ public class PauseMenu : MonoBehaviour
         // Free the player's movement
         playerController.IsPaused = false;
         flashlight.IsPaused = false;
+        footsteps.IsPaused = false;
 
         // Re-enable any scripts disabled when paused
     }

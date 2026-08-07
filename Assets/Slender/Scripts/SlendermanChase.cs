@@ -3,6 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class SlendermanChase : MonoBehaviour
 {
+    public SlenderManAI ai;
     public AudioSource staticNoise;
     public JumpscareMgmt jumpscareMgmt;
 
@@ -27,6 +28,10 @@ public class SlendermanChase : MonoBehaviour
     private Vector3 currentDirection;
     private bool inertia = false;
 
+    [Header("Post Escape")]
+    [SerializeField] private float postEscapeSecurityTime = 3f;
+    [SerializeField, ReadOnly] private float postEscapeTimer = 0f;
+
     public CharacterController SlenderController
     {
         get => controller;
@@ -50,6 +55,11 @@ public class SlendermanChase : MonoBehaviour
     public bool IsChasing
     {
         get => inertia;
+    }
+
+    public bool WasChasing
+    {
+        get => postEscapeTimer > 0f;
     }
 
     public bool IsChaseSoundPlaying
@@ -89,13 +99,13 @@ public class SlendermanChase : MonoBehaviour
             isPlayerInRange = distanceToPlayer <= (isPlayerInRange ? escapeDistance : playerDetectionRadius);
 
             // If the player is in range, move towards the player
-            if (isPlayerInRange) {
+            if (isPlayerInRange && !WasChasing) {
                 MoveTowardsPlayer(distanceToPlayer);
             } else if (inertia) {
                 staticNoise.Stop();
                 inertia = false;
                 ResetSprint();
-                // sylar: aqui a perseguicao eh concluida com escape de sucesso
+                StartPostEscape();
             } else SlowChase(distanceToPlayer);
         }
     }
@@ -141,7 +151,20 @@ public class SlendermanChase : MonoBehaviour
             Vector3 move = superSlowSpeed * Time.deltaTime * direction;
             controller.Move(move);
             transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
+            HandlePostEscape();
         }
+    }
+
+    void StartPostEscape()
+    {
+        postEscapeTimer = postEscapeSecurityTime;
+        ai.StartPostEscapeTeleportCooldown();
+    }
+
+    void HandlePostEscape()
+    {
+        if (postEscapeTimer <= 0f) return;
+        postEscapeTimer -= Time.deltaTime;
     }
 
     // (Optional) Visualize the detection radius in the editor

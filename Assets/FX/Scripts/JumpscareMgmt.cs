@@ -8,7 +8,7 @@ public class JumpscareMgmt : MonoBehaviour
     [SerializeField, ReadOnly] private bool isPlaying;
     [SerializeField, ReadOnly] private bool soundPlayed;
     
-    [SerializeField] private float realJumpscareCooldown = 90f;
+    [SerializeField] private float realJumpscareCooldown;
     [SerializeField, ReadOnly] private float elapsedTime;
 
     void Start()
@@ -51,7 +51,7 @@ public class JumpscareMgmt : MonoBehaviour
     public void MakeJumpscare(SlenderMirage mirage)
     {
         if (!isPlaying && !soundPlayed) {
-            mirage.IncrementJumpscare();
+            mirage.StartStaticVideo();
             audioSource.Play();
         }
     }

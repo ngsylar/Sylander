@@ -6,6 +6,7 @@ public class SlenderManAI : MonoBehaviour
     private static readonly WaitForSeconds _waitForSeconds5 = new(5f);
     
     public SlendermanChase chaser;
+    public SlenderMirage mirage;
 
     public Transform player; // Reference to the player's GameObject
     public float teleportMaxDistance; // 10f // Base teleportation distance
@@ -21,19 +22,20 @@ public class SlenderManAI : MonoBehaviour
     private AudioSource audioSource;
 
     private float staticActivationRange; // Range at which "static" should be activated
-    public float deathActivationRange; // 3f // Range at which death should be activated
+    public float deathActivationRange; // 2f // Range at which death should be activated
 
     private Vector3 baseTeleportSpot;
-    private float teleportTimer = 0f;
+    [SerializeField, ReadOnly] private float teleportTimer = 0f;
     private int teleportTrials = 0;
 
     private SlenderPlayerController playerController; // Reference to the player's controller
     private GameLogic gameLogic; // Reference to the game logic script
+    [SerializeField] private int lastSafePage;
     private int lastPageCount = -1;
 
-    // [Header("Post Escape")]
-    // [SerializeField] private float postEscapeTeleportCooldown = 12f;
-    // [SerializeField, ReadOnly] private float postEscapeTimer = 0f;
+    [Header("Post Escape")]
+    [SerializeField] private float postEscapeCooldown; // 15f
+    [SerializeField, ReadOnly] private float postEscapeTimer = 0f;
 
     [Header("Dinamic Things")]
     public float staticAlphaMin;
@@ -140,21 +142,9 @@ public class SlenderManAI : MonoBehaviour
             lastPageCount = gameLogic.pageCount;
         }
 
-        // ajusta frequencia de teleporte baseado na distancia
-        float adjustedCooldown = teleportCooldown;
-        float proximity = Mathf.InverseLerp(teleportMaxDistance, teleportMinDistance, DistanceToPlayer);
-        float distanceFactor = Mathf.Lerp(0.7f, 1.6f, proximity);
-        adjustedCooldown *= distanceFactor;
-
-        if (IsChasing) adjustedCooldown *= 1.5f;
-        teleportTimer += Time.deltaTime;
-
-        if (teleportTimer >= adjustedCooldown) {
-            teleportTimer = 0;
-            DecideTeleportAction();
-        }
-
+        HandleTeleportation();
         RotateTowardsPlayer();
+
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
         // Check player distance and toggle the "static" object accordingly
@@ -219,23 +209,23 @@ public class SlenderManAI : MonoBehaviour
             teleportProbability += 0.05f;
         }
 
-        if (pageCount >= 5)
-        {
-            // Pressão mais direta no player
-            teleportMinDistance -= 1.5f;
-            teleportCooldown -= 0.5f;
-        }
+        // if (pageCount >= 5)
+        // {
+        //     // Pressão mais direta no player
+        //     teleportMinDistance -= 1.5f;
+        //     teleportCooldown -= 0.5f;
+        // }
 
         if (pageCount >= 7)
         {
             // Final game: mais agressivo, mas sem quebrar o jogo
             teleportProbability = Mathf.Min(teleportProbability + 0.1f, 0.85f);
-            ChaseSpeed += 0.2f;
+            // ChaseSpeed += 0.2f;
         }
 
         // Clamp de segurança
-        teleportCooldown = Mathf.Max(3.5f, teleportCooldown);
-        teleportMinDistance = Mathf.Max(6f, teleportMinDistance);
+        teleportCooldown = Mathf.Max(4f, teleportCooldown);
+        teleportMinDistance = Mathf.Max(7f, teleportMinDistance);
 
     #if UNITY_EDITOR
         Debug.Log(
@@ -247,10 +237,39 @@ public class SlenderManAI : MonoBehaviour
     #endif
     }
 
+    public void StartPostEscapeTeleportCooldown()
+    {
+        postEscapeTimer = postEscapeCooldown;
+    }
+
+    private void HandleTeleportation()
+    {
+        if (postEscapeTimer > 0f)
+            postEscapeTimer -= Time.deltaTime;
+
+        // // ajusta frequencia de teleporte baseado na distancia
+        // float adjustedCooldown = teleportCooldown;
+        // float proximity = Mathf.InverseLerp(teleportMaxDistance, teleportMinDistance, DistanceToPlayer);
+        // float distanceFactor = Mathf.Lerp(0.7f, 1.6f, proximity);
+        // adjustedCooldown *= distanceFactor;
+
+        // if (IsChasing) adjustedCooldown *= 1.5f;
+        teleportTimer += Time.deltaTime;
+
+        // if (teleportTimer >= adjustedCooldown) {
+        if (teleportTimer >= teleportCooldown) {
+            teleportTimer = 0;
+            DecideTeleportAction();
+        }
+    }
+
     private void DecideTeleportAction()
     {
-        float adjustedProbability = teleportProbability;
-        if (IsChasing) adjustedProbability *= 0.4f;
+        if (postEscapeTimer > 0f) return;
+
+        // float adjustedProbability = teleportProbability;
+        // if (IsChasing) adjustedProbability *= 0.4f;
+        if (IsChasing) return;
         
         float randomValue = Random.value;
 
@@ -264,10 +283,12 @@ public class SlenderManAI : MonoBehaviour
             if ((gameLogic.pageCount == 7) && (randomValue < 0.2f))
                 TeleportNearPlayer(false);
 
-            else if (randomValue <= adjustedProbability)
+            // else if (randomValue <= adjustedProbability)
+            else if (randomValue <= teleportProbability)
                 TeleportNearPlayer();
 
-            // else TeleportToBaseSpot();
+            else if (lastPageCount <= lastSafePage)
+                TeleportToBaseSpot();
         }
         finally {
             chaser.SlenderController.enabled = true;
@@ -335,12 +356,12 @@ public class SlenderManAI : MonoBehaviour
             teleportTrials = 0;
 
             if (IsChasing) teleportsThisChase++;
+            chaser.JumpscareHandler.ResetRealJumpscare();
 
             #if UNITY_EDITOR
             Debug.Log($"Teleported | Dist: {teleportDistance:F1} | InView: {inView} | Bias: {bias:F2}");
             #endif
         }
-        chaser.JumpscareHandler.ResetRealJumpscare();
     }
 
     private void TeleportToBaseSpot()

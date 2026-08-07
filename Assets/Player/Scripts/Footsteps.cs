@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 public class Footsteps : MonoBehaviour
@@ -17,7 +16,6 @@ public class Footsteps : MonoBehaviour
         public float currentTime;
         public float currentVolume;
 
-
         public AudioMgmt(AudioSource audio, float volume, float duration)
         {
             this.audio = audio;
@@ -33,6 +31,22 @@ public class Footsteps : MonoBehaviour
     private AudioMgmt walking;
     private AudioMgmt running;
     [SerializeField, ReadOnly] private int currentState = 0;
+    private bool isPaused = false;
+
+    public bool IsPaused
+    {
+        get => isPaused;
+        set {
+            isPaused = value;
+            if (isPaused) {
+                walking.audio.volume = 0f;
+                running.audio.volume = 0f;
+            } else {
+                walking.audio.volume = walking.currentVolume;
+                running.audio.volume = running.currentVolume;
+            }
+        }
+    }
 
     void Awake()
     {
@@ -126,6 +140,7 @@ public class Footsteps : MonoBehaviour
 
     void Update()
     {
+        if (IsPaused) return;
         if (walking.isFadingIn) FadeIn(walking);
         if (walking.isFadingOut) FadeOut(walking);
         if (running.isFadingIn) FadeIn(running);

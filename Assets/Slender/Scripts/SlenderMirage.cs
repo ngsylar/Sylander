@@ -20,12 +20,9 @@ public class SlenderMirage : MonoBehaviour
     public float escapeDistance;        // 8f
 
     public JumpscareMgmt jumpscareMgmt;
-    [SerializeField] private int maxJumpscares = 4;
-    [SerializeField] private int maxJumpsPerPage = 2;
-    [SerializeField, ReadOnly] private int jumpscaresDone = 0;
-    [SerializeField, ReadOnly] private int jumpsPerPageDone = 0;
-    [SerializeField, ReadOnly] private float jumpscareChance = 0f;
-    [SerializeField, ReadOnly] private int lastJumpscarePage = -1;
+    [SerializeField] private float jumpscareChance; // 0.05f
+    [SerializeField] private int firstPage; // 2
+    [SerializeField] private int lastPage; // 4
     [SerializeField] private float trialCooldown; // 20f
     [SerializeField] private float jumpscareCooldown; // 120f
     [SerializeField, ReadOnly] private float currentJumpTime = 0f;
@@ -55,6 +52,11 @@ public class SlenderMirage : MonoBehaviour
         get => distanceToPlayer;
     }
 
+    public bool IsWorking
+    {
+        get => gameLogic.pageCount <= lastPage;
+    }
+
     void Start()
     {
         gameLogic = GameObject.FindWithTag("GameLogic").GetComponent<GameLogic>();
@@ -64,7 +66,7 @@ public class SlenderMirage : MonoBehaviour
 
     void Update()
     {
-        if (gameLogic.pageCount > 4) {
+        if (gameLogic.pageCount > lastPage) {
             gameObject.SetActive(false);
             return;
         }
@@ -94,45 +96,15 @@ public class SlenderMirage : MonoBehaviour
 
     private void JumpscareTrial()
     {
-        if (jumpscaresDone >= maxJumpscares
-            || gameLogic.pageCount < 1 || gameLogic.pageCount > 4
-            || jumpsPerPageDone >= maxJumpsPerPage)
+        if (gameLogic.pageCount < firstPage || gameLogic.pageCount > lastPage)
             return;
 
         currentJumpTime -= Time.deltaTime;
         if (currentJumpTime > 0f) return;
         
-        float baseChance;
-        float increment;
-
-        switch (gameLogic.pageCount) {
-            case 1:
-                baseChance = 0.20f;
-                increment = 0.04f;
-                break;
-            case 2:
-                baseChance = 0.20f;
-                increment = 0.08f;
-                break;
-            case 3:
-                baseChance = 0.14f;
-                increment = 0.06f;
-                break;
-            default: // pagina 4
-                baseChance = 0.08f;
-                increment = 0.04f;
-                break;
-        }
-        if (jumpscareChance <= 0f)
-            jumpscareChance = baseChance;
-
-        if (Random.value <= jumpscareChance) {
+        if (Random.value <= jumpscareChance)
             TeleportNearPlayer();
-        } else {
-            currentJumpTime = trialCooldown;
-            jumpscareChance += increment;
-            jumpscareChance = Mathf.Min(jumpscareChance + increment, 0.50f);
-        }
+        else currentJumpTime = trialCooldown;
     }
 
     private void TeleportNearPlayer()
@@ -160,18 +132,8 @@ public class SlenderMirage : MonoBehaviour
         }
     }
 
-    public void IncrementJumpscare()
+    public void StartStaticVideo()
     {
-        jumpscaresDone++;
-        jumpscareChance = 0f;
-
-        if (lastJumpscarePage != gameLogic.pageCount) {
-            currentJumpTime = jumpscareCooldown;
-            jumpsPerPageDone = 0;
-        }
-        lastJumpscarePage = gameLogic.pageCount;
-        jumpsPerPageDone++;
-
         permitVideo = true;
     }
 

@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class Flashlight : MonoBehaviour
 {
+    public GameLogic gameLogic;
     public SlenderManAI slenderman;
     public GameObject slendermetal0;
     public GameObject slendermetal1;
@@ -47,6 +48,7 @@ public class Flashlight : MonoBehaviour
 
     [SerializeField]
     private float slendermanDrainFactor; // 1.75f
+    public float slenderDistanceToFail; // 3f
 
     [SerializeField, ReadOnly]
     private float currentBattery;
@@ -88,16 +90,7 @@ public class Flashlight : MonoBehaviour
         off = true;
         flashlight.SetActive(false);
 
-        elapsedSeconds = 0f;
-        batterySeconds = batteryMinutes * 60f;
-        currentBattery = 1f;
-
-        lightIntensityCurrent = lightIntensityMax;
-        worldLightCurrent = worldLightMax;
-        fogDensityCurrent = fogDensityMax;
-
-        RenderSettings.ambientLight = new Color(worldLightOff, worldLightOff, worldLightOff);
-        RenderSettings.fogDensity = fogDensityOff;
+        SetupFlashlight();
         
         #if UNITY_EDITOR
         if (debugMode) {
@@ -108,13 +101,27 @@ public class Flashlight : MonoBehaviour
         #endif
     }
 
+    void SetupFlashlight()
+    {
+        elapsedSeconds = 0f;
+        batterySeconds = batteryMinutes * 60f;
+        currentBattery = 1f;
+
+        lightIntensityCurrent = lightIntensityMax;
+        worldLightCurrent = worldLightMax;
+        fogDensityCurrent = fogDensityMax;
+
+        RenderSettings.ambientLight = new Color(worldLightOff, worldLightOff, worldLightOff);
+        RenderSettings.fogDensity = fogDensityOff;
+    }
+
     void Update()
     {
         #if UNITY_EDITOR
         if (debugMode) return;
         #endif
 
-        if (isPaused) return;
+        if (isPaused || gameLogic.IsDead) return;
 
         if (off && Input.GetButtonDown("flashlight") && !isFlicking) {
             turnOn.Play();
@@ -123,12 +130,22 @@ public class Flashlight : MonoBehaviour
         } else if (on) {
             DrainBattery();
 
+            if (slenderman.DistanceToPlayer <= slenderDistanceToFail) {
+                LightsOff();
+                return;
+            }
             if (Input.GetButtonDown("flashlight") && !isFlicking) {
                 turnOff.Play();
                 LightsOff();
             }
             else FlickLogic();
         }
+    }
+
+    public void Restart()
+    {
+        SetupFlashlight();
+        LightsOn();
     }
 
     void LightsOn ()
