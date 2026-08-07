@@ -129,7 +129,7 @@ public class SlenderManAI : MonoBehaviour
 
     private void Update()
     {
-        if (player == null) return;
+        if (player == null || gameLogic.IsPaused) return;
 
         // Freeze the player's movement
         if (gameLogic.IsDeathVideoPlaying) {
@@ -183,49 +183,33 @@ public class SlenderManAI : MonoBehaviour
         // --- PRESENÇA PASSIVA ---
         chaser.superSlowSpeed = Mathf.Lerp(0f, 1.5f, curve);
 
-        // --- CHASE ---
-        DistanceToChase = Mathf.Lerp(12f, 9f, curve);          // diminui levemente
-        DistanceToEscape  = Mathf.Lerp(10f, 13f, curve);         // sempre maior que chase
-
-        ChaseSpeed = Mathf.Lerp(4f, 5f, curve);
-
-        // Mantém aceleração mais natural (evita "teleporte de velocidade")
-        ChaseSprintDuration = Mathf.Lerp(3f, 1.2f, curve);
-
         // --- TELEPORTE ---
         teleportMinDistance = Mathf.Lerp(16f, 6f, curve);
         teleportMaxDistance = Mathf.Lerp(20f, 12f, curve);
 
         // Pressão mais constante (menos RNG extremo)
         teleportCooldown = Mathf.Lerp(14f, 4.5f, curve) + rand;
-
         teleportProbability = Mathf.Lerp(0.05f, 0.8f, curve);
-
-        // --- AJUSTES POR MARCOS IMPORTANTES ---
-
-        if (pageCount >= 3)
-        {
-            // Começa a ficar mais presente
-            teleportProbability += 0.05f;
-        }
-
-        // if (pageCount >= 5)
-        // {
-        //     // Pressão mais direta no player
-        //     teleportMinDistance -= 1.5f;
-        //     teleportCooldown -= 0.5f;
-        // }
-
-        if (pageCount >= 7)
-        {
-            // Final game: mais agressivo, mas sem quebrar o jogo
-            teleportProbability = Mathf.Min(teleportProbability + 0.1f, 0.85f);
-            // ChaseSpeed += 0.2f;
-        }
 
         // Clamp de segurança
         teleportCooldown = Mathf.Max(4f, teleportCooldown);
-        teleportMinDistance = Mathf.Max(7f, teleportMinDistance);
+        teleportMinDistance = Mathf.Max(8f, teleportMinDistance);
+
+        // --- CHASE ---
+        DistanceToChase = Mathf.Lerp(12f, 9f, curve);       // diminui levemente
+        // DistanceToEscape  = Mathf.Lerp(10f, 12f, curve);    // sempre maior que chase
+        ChaseSpeed = Mathf.Lerp(4f, 4.2f, curve);
+
+        // Mantém aceleração mais natural (evita "teleporte de velocidade")
+        ChaseSprintDuration = Mathf.Lerp(3f, 1.5f, curve);
+
+        // --- AJUSTES POR MARCOS IMPORTANTES ---
+
+        if (pageCount >= 3) // Começa a ficar mais presente
+            teleportProbability += 0.05f;
+
+        if (pageCount >= 7) // Final game: mais agressivo
+            teleportProbability = Mathf.Min(teleportProbability + 0.1f, 0.85f);
 
     #if UNITY_EDITOR
         Debug.Log(
@@ -267,8 +251,6 @@ public class SlenderManAI : MonoBehaviour
     {
         if (postEscapeTimer > 0f) return;
 
-        // float adjustedProbability = teleportProbability;
-        // if (IsChasing) adjustedProbability *= 0.4f;
         if (IsChasing) return;
         
         float randomValue = Random.value;
@@ -283,7 +265,6 @@ public class SlenderManAI : MonoBehaviour
             if ((gameLogic.pageCount == 7) && (randomValue < 0.2f))
                 TeleportNearPlayer(false);
 
-            // else if (randomValue <= adjustedProbability)
             else if (randomValue <= teleportProbability)
                 TeleportNearPlayer();
 

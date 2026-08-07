@@ -7,6 +7,7 @@ using TMPro; // Import the TextMeshPro namespace
 public class GameLogic : MonoBehaviour
 {
     private static readonly WaitForSeconds _waitForSeconds5 = new(5f);
+    public PauseMenu pauseMenu;
     public Flashlight flashlight;
     public BackgroundMgmt bgMusic;
 
@@ -27,6 +28,11 @@ public class GameLogic : MonoBehaviour
 
     [SerializeField, ReadOnly] private int currentClassPriority = -1;
     private bool isDeathVideoPlaying = false; // Flag to check if death video is playing
+
+    public bool IsPaused
+    {
+        get => pauseMenu.IsPaused;
+    }
 
     public bool IsDead
     {

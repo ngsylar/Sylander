@@ -117,6 +117,10 @@ public class SlendermanChase : MonoBehaviour
 
     void MoveTowardsPlayer(float distanceToPlayer)
     {
+        #if UNITY_EDITOR
+        if (!inertia) Debug.Log($"Chase started at a distance of {distanceToPlayer:F2}");
+        #endif
+
         chaseSprintTime += Time.deltaTime;
         float t = Mathf.Clamp01(chaseSprintTime / chaseSprintDuration);
         float chaseSpeed = Mathf.Lerp(0.5f, approachSpeed, t);
@@ -180,6 +184,7 @@ public class SlendermanChase : MonoBehaviour
             inHouse = true;
         }
         else if (other.gameObject.CompareTag("Pyramid")) {
+            // playerFlashlight.gazeFactor = 1.25f;
             jumpscareMgmt.MakeRealJumpscare();
         }
     }
@@ -189,5 +194,7 @@ public class SlendermanChase : MonoBehaviour
         if (other.gameObject.CompareTag("Building")) {
             inHouse = false;
         }
+        // else if (other.gameObject.CompareTag("Pyramid"))
+        //     playerFlashlight.gazeFactor = 1f;
     }
 }

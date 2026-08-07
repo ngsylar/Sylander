@@ -3781,7 +3781,7 @@ MonoBehaviour:
   flashlightInterferenceRadius: 20
   playerDetectionRadius: 12
   approachSpeed: 4.8
-  escapeDistance: 0
+  escapeDistance: 10
   killDistance: 1
   chaseSprintDuration: 2
   superSlowSpeed: 0.5
@@ -4181,6 +4181,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b35795ad70e66b439bf7483d8639ac9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pauseMenu: {fileID: 1755442667}
   flashlight: {fileID: 2094627571}
   bgMusic: {fileID: 2138252399}
   counter: {fileID: 1958041301}
@@ -11138,6 +11139,7 @@ MonoBehaviour:
   breath: {fileID: 511651100}
   footsteps: {fileID: 1198247614}
   flashlight: {fileID: 2094627571}
+  chaser: {fileID: 854204197}
   walkSpeed: 3
   runSpeed: 5.2
   gravity: 10

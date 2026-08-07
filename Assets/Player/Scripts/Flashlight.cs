@@ -49,6 +49,7 @@ public class Flashlight : MonoBehaviour
     [SerializeField]
     private float slendermanDrainFactor; // 1.75f
     public float slenderDistanceToFail; // 3f
+    public float gazeFactor = 1f;
 
     [SerializeField, ReadOnly]
     private float currentBattery;
@@ -181,7 +182,8 @@ public class Flashlight : MonoBehaviour
     void DrainBattery ()
     {
         float d = Mathf.InverseLerp(slenderman.InterferenceMin, slenderman.InterferenceMax, slenderman.DistanceToPlayer);
-        elapsedSeconds += Time.deltaTime * Mathf.Lerp(1f, slendermanDrainFactor, d);
+        float distanceFactor = Mathf.Lerp(1f, slendermanDrainFactor, d);
+        elapsedSeconds += Time.deltaTime * distanceFactor * gazeFactor;
         float t = elapsedSeconds / batterySeconds;
         currentBattery = 1f - t;
 

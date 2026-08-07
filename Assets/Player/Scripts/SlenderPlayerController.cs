@@ -10,7 +10,7 @@ public class SlenderPlayerController : MonoBehaviour
 
     CharacterController characterController;
     public Flashlight flashlight;
-    // private Animator animator;
+    public SlendermanChase chaser;
 
     public float walkSpeed; // 3f
     public float runSpeed; // 5.2f
@@ -117,6 +117,10 @@ public class SlenderPlayerController : MonoBehaviour
                 currentStamina = 0f;
                 currentStaminaCooldown = staminaCooldown; // só existe se zerar
                 breath.Play();
+                
+                #if UNITY_EDITOR
+                Debug.Log($"Stamina ended at a distance of {chaser.DistanceToPlayer:F2}");
+                #endif
             }
         } else {
             if (currentStaminaCooldown > 0f) { // Se estiver em cooldown (só acontece se zerou)
