@@ -3,7 +3,6 @@ using UnityEngine;
 public class CollectPages : MonoBehaviour
 {
     public PageSelector pageSelector;
-    private Renderer pageRenderer;
  
     public GameObject collectText;
 
@@ -28,7 +27,6 @@ public class CollectPages : MonoBehaviour
         gameLogic = gameLogicGO.GetComponent<GameLogic>();
 
         page = this.gameObject;
-        pageRenderer = page.GetComponent<Renderer>();
     }
 
     void OnTriggerEnter(Collider other)
@@ -38,7 +36,6 @@ public class CollectPages : MonoBehaviour
             collectText.SetActive(true);
         }
         if (other.gameObject.CompareTag("Player")) {
-            pageRenderer.material = pageSelector.textures[gameLogic.pageCount];
             playerInArea = true;
         }
     }
@@ -56,13 +53,13 @@ public class CollectPages : MonoBehaviour
 
     void Update()
     {
-        if(inReach && Input.GetButtonDown("pickup"))
-        {
+        if(inReach && Input.GetButtonDown("pickup")) {
             gameLogic.AddPage();
             collectSound.Play();
             collectText.SetActive(false);
             page.SetActive(false);
             inReach = false;
+            pageSelector.UpdatePages(gameLogic.pageCount);
         }
     }
 }

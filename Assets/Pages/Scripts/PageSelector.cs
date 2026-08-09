@@ -15,20 +15,20 @@ public class PageSelector : MonoBehaviour
     public List<GameObject> pages9;
     public List<GameObject> pages10;
 
+    private Dictionary<GameObject, Renderer> selectedPages = new();
+
     void Awake() {
         List<int> lista = new();
         for (int i = 0; i < 10; i++)
             lista.Add(i);
 
-        for (int i = 0; i < lista.Count; i++)
-        {
+        for (int i = 0; i < lista.Count; i++) {
             int randIndex = Random.Range(i, lista.Count);
             (lista[randIndex], lista[i]) = (lista[i], lista[randIndex]);
         }
         List<int> selectedAreas = lista.GetRange(0, 7);
 
-        List<List<GameObject>> areas = new()
-        {
+        List<List<GameObject>> areas = new() {
             pages1,
             pages2,
             pages3,
@@ -40,21 +40,25 @@ public class PageSelector : MonoBehaviour
             pages9,
             pages10
         };
-
-        foreach (int area in selectedAreas)
-        {
-            int page = Random.Range(0, areas[area].Count);
-            areas[area][page].SetActive(true);
+        foreach (int area in selectedAreas) {
+            int pageNumber = Random.Range(0, areas[area].Count);
+            var page = areas[area][pageNumber];
+            page.SetActive(true);
+            var renderer = page.GetComponent<Renderer>();
+            selectedPages.Add(page, renderer);
         }
-
-        foreach (int area in lista)
-        {
+        foreach (int area in lista) {
             for (int page=areas[area].Count-1; page>=0; page--)
-            {
                 if (!areas[area][page].activeSelf)
                     Destroy(areas[area][page], 0.1f);
-            }
         }
         enabled = false;
+    }
+
+    public void UpdatePages(int pageNumber)
+    {
+        foreach (var (page, renderer) in selectedPages)
+            if (page.activeSelf)
+                renderer.material = textures[pageNumber];
     }
 }
