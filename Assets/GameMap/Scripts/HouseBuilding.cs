@@ -110,4 +110,20 @@ public class HouseBuilding : MonoBehaviour
         int index = math.lzcnt(mask);
         return nodes[index];
     }
+
+    public bool IsTheSame (int index, uint mask)
+    {
+        return IndexToMask(index) == mask;
+    }
+
+    public bool IsTheSame (int index, Collider collider)
+    {
+        return nodes[index] == collider;
+    }
+
+    public bool IsTheSame (Collider collider, uint mask)
+    {
+        uint colliderMask = GetMaskByCollider(collider);
+        return (mask & colliderMask) > 0u;
+    }
 }

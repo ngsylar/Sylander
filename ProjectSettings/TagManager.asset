@@ -12,6 +12,7 @@ TagManager:
   - Building
   - SlenderMirage
   - Pyramid
+  - PlayerPresence
   layers:
   - Default
   - TransparentFX

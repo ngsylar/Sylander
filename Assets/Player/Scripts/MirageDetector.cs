@@ -85,6 +85,6 @@ public class MirageDetector : MonoBehaviour
 
     void OnCustomExit (Collider other)
     {
-        // if (!flashlight.IsOn) return;
+        if (!flashlight.IsOn) return;
     }
 }

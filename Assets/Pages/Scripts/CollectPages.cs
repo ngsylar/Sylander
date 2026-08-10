@@ -5,16 +5,32 @@ public class CollectPages : MonoBehaviour
     public PageSelector pageSelector;
  
     public GameObject collectText;
-
     public AudioSource collectSound;
 
-    private GameObject page;
+    private BoxCollider boxCollider;
+    [SerializeField] private Collider placement;
 
     private bool inReach;
     [SerializeField, ReadOnly] private bool playerInArea;
+    [SerializeField] private bool isHousePage;
 
     private GameObject gameLogicGO;
     private GameLogic gameLogic;
+
+    public bool IsHousePage
+    {
+        get => isHousePage;
+    }
+
+    public BoxCollider GetBoxCollider
+    {
+        get => boxCollider;
+    }
+
+    public Collider GetPlacement
+    {
+        get => placement;
+    }
 
     void Start()
     {
@@ -26,7 +42,8 @@ public class CollectPages : MonoBehaviour
         gameLogicGO = GameObject.FindWithTag("GameLogic");
         gameLogic = gameLogicGO.GetComponent<GameLogic>();
 
-        page = this.gameObject;
+        boxCollider = gameObject.GetComponent<BoxCollider>();
+        if (isHousePage) boxCollider.enabled = false;
     }
 
     void OnTriggerEnter(Collider other)
@@ -57,9 +74,20 @@ public class CollectPages : MonoBehaviour
             gameLogic.AddPage();
             collectSound.Play();
             collectText.SetActive(false);
-            page.SetActive(false);
+            gameObject.SetActive(false);
             inReach = false;
             pageSelector.UpdatePages(gameLogic.pageCount);
+        }
+        if (isHousePage && playerInArea) {
+            var playerPlacement = gameLogic.playerPresence.CurrentPlacement;
+            if (boxCollider.enabled) {
+                if (playerPlacement != placement) {
+                    boxCollider.enabled = false;
+                    collectText.SetActive(false);
+                    inReach = false;
+                }
+            } else if (playerPlacement == placement)
+                boxCollider.enabled = true;
         }
     }
 }

@@ -8,8 +8,10 @@ public class GameLogic : MonoBehaviour
 {
     private static readonly WaitForSeconds _waitForSeconds5 = new(5f);
     public PauseMenu pauseMenu;
-    public Flashlight flashlight;
     public BackgroundMgmt bgMusic;
+
+    public PresenceDetector playerPresence;
+    public Flashlight flashlight;
 
     public GameObject counter;
     public int pageCount;

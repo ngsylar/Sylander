@@ -4,39 +4,73 @@ using UnityEngine;
 public class PresenceDetector : MonoBehaviour
 {
     public HouseBuilding house;
+    [SerializeField, ReadOnly] private Collider currentPlacement;
 
     [SerializeField] private bool isPredator;
 
-    public bool present { get; set; }
-    public bool entered { get; set; }
+    public bool inside { get; set; }
+    public bool inFront { get; set; }
+    public bool behind { get; set; }
+
+    public Collider CurrentPlacement
+    {
+        get => currentPlacement;
+    }
 
     void Start()
     {
-        present = false;
-        entered = false;
+        inside = false;
+        inFront = false;
+        behind = false;
     }
 
-    public bool IsOutside(Collider collider)
-    {
-        uint mask = house.GetMaskByCollider(collider);
-        bool leaving = (mask & house.outside) > 0u;
-        if (!leaving) return false;
-        bool entering = (mask & house.inside) > 0u;
-        return leaving && !entering;
-    }
+    // public bool IsOutside(Collider collider)
+    // {
+    //     bool isPresent = house.IsTheSame(collider, house.outside);
+    //     if (!isPresent) return false;
+    //     bool isInside = house.IsTheSame(collider, house.inside);
+    //     return isPresent && !isInside;
+    // }
 
-    public bool IsInside(Collider collider)
-    {
-        if (entered) return true;
-        uint mask = house.GetMaskByCollider(collider);
-        return (mask & house.inside) > 0u;
-    }
+    // public bool IsInside(Collider collider)
+    // {
+    //     if (entered) return true;
+    //     return house.IsTheSame(collider, house.inside);
+    // }
 
     void OnTriggerEnter(Collider collider)
     {
-        // present = true;
-        // if (IsInside(collider))
-        //     entered = true;
+        if (collider == house.entrada || collider == house.saida)
+            inside = true;
+        else if (collider == house.tras)
+            behind = true;
+        else if (collider == house.frente)
+            inFront = true;
+    }
+
+    void OnTriggerStay(Collider collider)
+    {
+        if (inside) {
+            if (house.IsTheSame(collider, house.inside))
+                currentPlacement = collider;
+        }
+        else if (behind) currentPlacement = house.tras;
+        else if (inFront) currentPlacement = house.frente;
+    }
+
+    void OnTriggerExit(Collider collider)
+    {
+        if ((collider == house.entrada || collider == house.saida)
+            && (transform.position.x >= house.entrada.bounds.max.x
+            || transform.position.x <= house.saida.bounds.min.x)) {
+            inside = false;
+        }
+        else if (!inside) {
+            if (collider == house.tras) behind = false;
+            else if (collider == house.frente) inFront = false;
+        }
+        if (!inside && !behind && !inFront)
+            currentPlacement = null;
     }
 
     public List<int> GetRandomExplorationPath(int startNode)
