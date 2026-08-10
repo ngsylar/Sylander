@@ -40,35 +40,33 @@ public class PresenceDetector : MonoBehaviour
 
     void OnTriggerEnter(Collider collider)
     {
-        if (collider == house.entrada || collider == house.saida)
+        if (collider == house.entrance || collider == house.exit)
             inside = true;
-        else if (collider == house.tras)
+        else if (collider == house.back)
             behind = true;
-        else if (collider == house.frente)
+        else if (collider == house.front)
             inFront = true;
     }
 
     void OnTriggerStay(Collider collider)
     {
         if (inside) {
-            if (house.IsTheSame(collider, house.inside))
+            if (house.inside.Includes(collider))
                 currentPlacement = collider;
         }
-        else if (behind) currentPlacement = house.tras;
-        else if (inFront) currentPlacement = house.frente;
+        else if (behind) currentPlacement = house.back;
+        else if (inFront) currentPlacement = house.front;
     }
 
     void OnTriggerExit(Collider collider)
     {
-        if ((collider == house.entrada || collider == house.saida)
-            && (transform.position.x >= house.entrada.bounds.max.x
-            || transform.position.x <= house.saida.bounds.min.x)) {
+        if ((collider == house.entrance || collider == house.exit)
+            && (transform.position.x >= house.entrance.bounds.max.x
+            || transform.position.x <= house.exit.bounds.min.x)) {
             inside = false;
         }
-        else if (!inside) {
-            if (collider == house.tras) behind = false;
-            else if (collider == house.frente) inFront = false;
-        }
+        else if (collider == house.back) behind = false;
+        else if (collider == house.front) inFront = false;
         if (!inside && !behind && !inFront)
             currentPlacement = null;
     }

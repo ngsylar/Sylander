@@ -16,10 +16,9 @@ public class SlenderManAI : MonoBehaviour
     public float rotationSpeed = 5f; // Rotation speed when looking at the player
     public int maxTeleportsPerChase; // 0
 
+    [SerializeField] private float firstCooldown; // 120f
+    private float adjustedCooldown;
     private int teleportsThisChase = 0;
-
-    public AudioClip teleportSound; // Reference to the teleport sound effect
-    private AudioSource audioSource;
 
     private float staticActivationRange; // Range at which "static" should be activated
     public float deathActivationRange; // 2f // Range at which death should be activated
@@ -98,28 +97,15 @@ public class SlenderManAI : MonoBehaviour
     private void Start()
     {
         baseTeleportSpot = transform.position;
+        adjustedCooldown = firstCooldown;
 
         UpdateActivationRange();
-
-        // SetupTeleportSound();
 
         // Get reference to the player's controller
         playerController = player.GetComponent<SlenderPlayerController>();
 
         // Get reference to the game logic script
         gameLogic = GameObject.FindWithTag("GameLogic").GetComponent<GameLogic>();
-    }
-
-    void SetupTeleportSound()
-    {
-        // Get or add an AudioSource component
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-            audioSource = gameObject.AddComponent<AudioSource>();
-
-        // Set the teleport sound
-        audioSource.clip = teleportSound;
-        audioSource.volume = 0.3f;
     }
 
     public void UpdateActivationRange()
@@ -177,9 +163,6 @@ public class SlenderManAI : MonoBehaviour
         // Curva em S (mais natural psicologicamente)
         float curve = Mathf.SmoothStep(0f, 1f, t);
 
-        // Pequena variação aleatória (evita previsibilidade)
-        float rand = Random.Range(-0.5f, 0.5f);
-
         // --- PRESENÇA PASSIVA ---
         chaser.superSlowSpeed = Mathf.Lerp(0f, 1.5f, curve);
 
@@ -188,7 +171,7 @@ public class SlenderManAI : MonoBehaviour
         teleportMaxDistance = Mathf.Lerp(20f, 12f, curve);
 
         // Pressão mais constante (menos RNG extremo)
-        teleportCooldown = Mathf.Lerp(14f, 4.5f, curve) + rand;
+        teleportCooldown = Mathf.Lerp(14f, 4.5f, curve);
         teleportProbability = Mathf.Lerp(0.05f, 0.8f, curve);
 
         // Clamp de segurança
@@ -231,18 +214,11 @@ public class SlenderManAI : MonoBehaviour
         if (postEscapeTimer > 0f)
             postEscapeTimer -= Time.deltaTime;
 
-        // // ajusta frequencia de teleporte baseado na distancia
-        // float adjustedCooldown = teleportCooldown;
-        // float proximity = Mathf.InverseLerp(teleportMaxDistance, teleportMinDistance, DistanceToPlayer);
-        // float distanceFactor = Mathf.Lerp(0.7f, 1.6f, proximity);
-        // adjustedCooldown *= distanceFactor;
-
-        // if (IsChasing) adjustedCooldown *= 1.5f;
         teleportTimer += Time.deltaTime;
-
-        // if (teleportTimer >= adjustedCooldown) {
-        if (teleportTimer >= teleportCooldown) {
+        if (teleportTimer >= adjustedCooldown) {
             teleportTimer = 0;
+            float rand = Random.Range(-0.5f, 0.5f); // pequena variacao evita previsibilidade
+            adjustedCooldown = teleportCooldown + rand;
             DecideTeleportAction();
         }
     }
@@ -324,6 +300,7 @@ public class SlenderManAI : MonoBehaviour
         if ((teleportDistance < teleportMinDistance) || (IsChasing && (teleportDistance < DistanceToPlayer)))
         {
             teleportTimer = (teleportTrials < 5) ? teleportCooldown : 0;
+            adjustedCooldown = teleportCooldown;
             teleportTrials++;
 
             #if UNITY_EDITOR
