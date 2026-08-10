@@ -14,9 +14,7 @@ public class SlendermanChase : MonoBehaviour
     public float killDistance;                  // 1f // Distance at which the NPC kills the player
     public float chaseSprintDuration;           // 3f
     private float chaseSprintTime = 0f;
-
     public float superSlowSpeed; // 0.5f
-    [SerializeField, ReadOnly] private bool inHouse = false;
 
     public Transform player;             // Reference to the player's transform
     public Flashlight playerFlashlight;
@@ -137,7 +135,7 @@ public class SlendermanChase : MonoBehaviour
             }
             Vector3 desiredDirection = (player.position - transform.position).normalized;
             currentDirection = Vector3.Lerp(currentDirection, desiredDirection, inertiaFactor);
-            Vector3 move = (inHouse ? superSlowSpeed : chaseSpeed) * Time.deltaTime * currentDirection.normalized;
+            Vector3 move = chaseSpeed * Time.deltaTime * currentDirection.normalized;
 
             // Move the NPC using the CharacterController
             controller.Move(move);
@@ -180,21 +178,23 @@ public class SlendermanChase : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Building")) {
-            inHouse = true;
-        }
-        else if (other.gameObject.CompareTag("Pyramid")) {
-            // playerFlashlight.gazeFactor = 1.25f;
+        if (other.gameObject.CompareTag("Pyramid") && playerFlashlight.IsOn)
             jumpscareMgmt.MakeRealJumpscare();
+    }
+
+    void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.CompareTag("Pyramid")) {
+            if (playerFlashlight.IsOn) {
+                float d = Mathf.InverseLerp(20f, 0f, distanceToPlayer);
+                playerFlashlight.gazeFactor = Mathf.Lerp(1f, 1.25f, d);
+            } else playerFlashlight.gazeFactor = 1f;
         }
     }
 
     void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.CompareTag("Building")) {
-            inHouse = false;
-        }
-        // else if (other.gameObject.CompareTag("Pyramid"))
-        //     playerFlashlight.gazeFactor = 1f;
+        if (other.gameObject.CompareTag("Pyramid"))
+            playerFlashlight.gazeFactor = 1f;
     }
 }

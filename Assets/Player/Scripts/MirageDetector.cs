@@ -3,19 +3,20 @@ using UnityEngine;
 public class MirageDetector : MonoBehaviour
 {
     [Header("Configuração de Filtro")]
-    public LayerMask layerAlvo; // Selecione a Layer do objeto parado no Inspetor
+    public LayerMask layerAlvo; // selecione a layer do objeto a detectar
 
     private MeshCollider meuMeshCollider;
     private bool estavaDentro = false;
     private Collider colliderAtual = null;
 
+    public Flashlight flashlight;
     public JumpscareMgmt flashlightPyramid;
 
     void Start()
     {
         meuMeshCollider = GetComponent<MeshCollider>();
 
-        // Força a reconstrução do MeshCollider caso a malha tenha sido alterada
+        // forca a reconstrucao do MeshCollider caso a malha tenha sido alterada
         if (meuMeshCollider != null) {
             Mesh mesh = meuMeshCollider.sharedMesh;
             meuMeshCollider.sharedMesh = null;
@@ -28,10 +29,10 @@ public class MirageDetector : MonoBehaviour
         if (meuMeshCollider == null || meuMeshCollider.sharedMesh == null)
             return;
 
-        // Usa os bounds atuais do collider
+        // usa os bounds atuais do collider
         Bounds bounds = meuMeshCollider.bounds;
 
-        // 1. Faz uma checagem rápida ao redor da pirâmide para achar o objeto parado
+        // 1. Faz uma checagem rapida ao redor da piramide para achar o objeto parado
         Collider[] colisoresProximos = Physics.OverlapBox(
             bounds.center,
             bounds.extents,
@@ -42,7 +43,7 @@ public class MirageDetector : MonoBehaviour
         bool estaColidindoMeshExato = false;
         Collider outroAtual = null;
 
-        // 2. Se achou o objeto por perto, testa a geometria exata da pirâmide contra ele
+        // 2. Se achou o objeto por perto, testa a geometria exata da piramide contra ele
         foreach (Collider outroCollider in colisoresProximos)
         {
             Vector3 direcao;
@@ -77,10 +78,13 @@ public class MirageDetector : MonoBehaviour
 
     void OnCustomEnter (Collider other)
     {
-        if (other != null && other.gameObject.CompareTag("SlenderMirage")) {
+        if (!flashlight.IsOn) return;
+        if (other != null && other.gameObject.CompareTag("SlenderMirage"))
             flashlightPyramid.MakeJumpscare(other.GetComponent<SlenderMirage>());
-        }
     }
 
-    void OnCustomExit (Collider other) {}
+    void OnCustomExit (Collider other)
+    {
+        // if (!flashlight.IsOn) return;
+    }
 }
