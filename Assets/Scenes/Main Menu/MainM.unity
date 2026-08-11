@@ -2802,7 +2802,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 50.47, y: 218.86}
+  m_AnchoredPosition: {x: 0, y: 218.86}
   m_SizeDelta: {x: 498.5, y: 148.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &754839289
@@ -2832,13 +2832,13 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 0
     m_MaxSize: 189
-    m_Alignment: 0
+    m_Alignment: 1
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: SLENDERMAN
+  m_Text: SYLANDER.MAN
 --- !u!222 &754839290
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2960,8 +2960,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -14.4, y: 34.45002}
-  m_SizeDelta: {x: 167.3, y: 45.4}
+  m_AnchoredPosition: {x: 8.9, y: 34.45002}
+  m_SizeDelta: {x: 250, y: 45.4}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &817948097
 MonoBehaviour:
@@ -2996,7 +2996,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text:  
+  m_Text: Mubeen Naushad
 --- !u!222 &817948098
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3777,7 +3777,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text:  
+  m_Text: 
 --- !u!222 &1139776787
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -5331,8 +5331,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1, y: -5.38}
-  m_SizeDelta: {x: 165.58, y: 46.7}
+  m_AnchoredPosition: {x: -12.75, y: -5.38}
+  m_SizeDelta: {x: 250, y: 46.7}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1524896736
 MonoBehaviour:
@@ -5367,7 +5367,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text:  
+  m_Text: Gabriel Fontenelle
 --- !u!222 &1524896737
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -5564,7 +5564,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 11.2, y: -171.8}
+  m_AnchoredPosition: {x: 0, y: -171.8}
   m_SizeDelta: {x: 395.7, y: 51.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1647080845
@@ -5594,13 +5594,13 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 0
     m_MaxSize: 84
-    m_Alignment: 0
+    m_Alignment: 1
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Game Development Final Project
+  m_Text: collect the 8 pages
 --- !u!222 &1647080846
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7007,7 +7007,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Mubeen Naushad
+  m_Text: 
 --- !u!222 &2112186900
 CanvasRenderer:
   m_ObjectHideFlags: 0
