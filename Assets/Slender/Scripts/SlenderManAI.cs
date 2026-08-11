@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class SlenderManAI : MonoBehaviour
@@ -5,40 +6,51 @@ public class SlenderManAI : MonoBehaviour
     private static readonly int _classSlenderId = 0;
     private static readonly WaitForSeconds _waitForSeconds5 = new(5f);
     
+    private HouseBuilding house;
+    public PresenceHunter presence;
     public SlendermanChase chaser;
     public SlenderMirage mirage;
 
     public Transform player; // Reference to the player's GameObject
+    public PresenceDetector playerPresence;
+
+    [Header("Dynamic Properties")]
     public float teleportMaxDistance; // 10f // Base teleportation distance
     public float teleportMinDistance; // 8f // Has to be bigger than deathActivationRange
     public float teleportCooldown; // 12f // Base time between teleportation attempts
+    public float teleportHouseCooldown;
     public float teleportProbability; // 0.02f // Base probability of chasing the player
-    public float rotationSpeed = 5f; // Rotation speed when looking at the player
-    public int maxTeleportsPerChase; // 0
+    public float rotationSpeed; // 50f // Rotation speed when looking at the player
 
+    [Header("Fixed Properties")]
     [SerializeField] private float firstCooldown; // 120f
     private float adjustedCooldown;
-    private int teleportsThisChase = 0;
 
     private float staticActivationRange; // Range at which "static" should be activated
     public float deathActivationRange; // 2f // Range at which death should be activated
 
     private Vector3 baseTeleportSpot;
     [SerializeField, ReadOnly] private float teleportTimer = 0f;
-    private int teleportTrials = 0;
 
     private SlenderPlayerController playerController; // Reference to the player's controller
     private GameLogic gameLogic; // Reference to the game logic script
     [SerializeField] private int lastSafePage;
     private int lastPageCount = -1;
 
-    [Header("Post Escape")]
     [SerializeField] private float postEscapeCooldown; // 15f
     [SerializeField, ReadOnly] private float postEscapeTimer = 0f;
 
-    [Header("Dinamic Things")]
+    [Header("Dynamic Environment")]
     public float staticAlphaMin;
     public float staticAlphaMax;
+
+    public List<int> Pathfind { get; set; }
+
+    public Vector3 GetTarget
+    {
+        get => (Pathfind == null || Pathfind.Count == 0)
+            ? player.position : house.GetColliderByIndex(Pathfind[0]).transform.position;
+    }
 
     public float InterferenceMin
     {
@@ -94,8 +106,27 @@ public class SlenderManAI : MonoBehaviour
         get => chaser.IsChasing;
     }
 
+    public bool AreBothInSamePlace
+    {
+        get => (!playerPresence.IsInside && !presence.IsInside)
+            || (playerPresence.IsInside && presence.IsPresent);
+    }
+
+    public bool AreBothClose
+    {
+        get => (!playerPresence.IsInside && !presence.IsInside)
+            || (playerPresence.IsInside && presence.IsInside);
+    }
+
+    public bool AreBothPresent
+    {
+        get => playerPresence.IsInside && presence.IsPresent;
+    }
+
     private void Start()
     {
+        house = presence.house;
+
         baseTeleportSpot = transform.position;
         adjustedCooldown = firstCooldown;
 
@@ -122,28 +153,31 @@ public class SlenderManAI : MonoBehaviour
             playerController.canMove = false;
             return;
         }
-
         if (gameLogic.pageCount != lastPageCount) {
             UpdateAggressiveness(gameLogic.pageCount);
             lastPageCount = gameLogic.pageCount;
         }
-
         HandleTeleportation();
         RotateTowardsPlayer();
 
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        if (AreBothInSamePlace) HandleVideo(true);
+        else HandleVideo(false);
+    }
 
-        // Check player distance and toggle the "static" object accordingly
-        if (distanceToPlayer <= deathActivationRange) {
+    private void HandleVideo(bool keepPlaying=true)
+    {
+        if (!keepPlaying || DistanceToPlayer > staticActivationRange)
+            gameLogic.StopVideo(_classSlenderId);
+
+        else if (DistanceToPlayer <= deathActivationRange && AreBothClose)
             gameLogic.KeepDeathVideo(!chaser.IsChaseSoundPlaying);
-        }
-        else if (distanceToPlayer <= staticActivationRange) {
+
+        else // if (DistanceToPlayer <= staticActivationRange)
             gameLogic.KeepStaticVideo(
                 _classSlenderId,
-                InterferenceMin, InterferenceMax, distanceToPlayer,
+                InterferenceMin, InterferenceMax, DistanceToPlayer,
                 staticAlphaMin, staticAlphaMax
             );
-        } else gameLogic.StopVideo(_classSlenderId);
     }
 
     private void UpdateAggressiveness(int pageCount)
@@ -172,10 +206,10 @@ public class SlenderManAI : MonoBehaviour
 
         // Pressão mais constante (menos RNG extremo)
         teleportCooldown = Mathf.Lerp(14f, 4.5f, curve);
+        teleportHouseCooldown = Mathf.Lerp(4.5f, 14f, curve);
         teleportProbability = Mathf.Lerp(0.05f, 0.8f, curve);
 
         // Clamp de segurança
-        teleportCooldown = Mathf.Max(4f, teleportCooldown);
         teleportMinDistance = Mathf.Max(8f, teleportMinDistance);
 
         // --- CHASE ---
@@ -199,7 +233,7 @@ public class SlenderManAI : MonoBehaviour
             $"[Page {pageCount}] " +
             $"ChaseDist: {DistanceToChase:F1} | EscapeDist: {DistanceToEscape:F1} | " +
             $"Speed: {ChaseSpeed:F1} | TP: {teleportMinDistance:F1}-{teleportMaxDistance:F1} | " +
-            $"CD: {teleportCooldown:F1} | Prob: {teleportProbability:F2}"
+            $"CD: {teleportCooldown:F1} | {teleportHouseCooldown:F1} | Prob: {teleportProbability:F2}"
         );
     #endif
     }
@@ -218,17 +252,14 @@ public class SlenderManAI : MonoBehaviour
         if (teleportTimer >= adjustedCooldown) {
             teleportTimer = 0;
             float rand = Random.Range(-0.5f, 0.5f); // pequena variacao evita previsibilidade
-            adjustedCooldown = teleportCooldown + rand;
+            adjustedCooldown = (AreBothPresent ? teleportHouseCooldown : teleportCooldown) + rand;
             DecideTeleportAction();
         }
     }
 
     private void DecideTeleportAction()
     {
-        if (postEscapeTimer > 0f) return;
-
-        if (IsChasing) return;
-        
+        if (postEscapeTimer > 0f || IsChasing) return;
         float randomValue = Random.value;
 
         #if UNITY_EDITOR
@@ -238,12 +269,15 @@ public class SlenderManAI : MonoBehaviour
         chaser.SlenderController.enabled = false;
 
         try {
-            if ((gameLogic.pageCount == 7) && (randomValue < 0.2f))
-                TeleportNearPlayer(false);
+            bool shouldTeleport = randomValue <= teleportProbability;
 
-            else if (randomValue <= teleportProbability)
-                TeleportNearPlayer();
+            if (shouldTeleport) {
+                if (playerPresence.IsInside) TeleportToHouse();
 
+                else if (gameLogic.pageCount == 7 && randomValue < 0.2f)
+                    TeleportNearPlayer(false);
+                else TeleportNearPlayer();
+            }
             else if (lastPageCount <= lastSafePage)
                 TeleportToBaseSpot();
         }
@@ -254,10 +288,6 @@ public class SlenderManAI : MonoBehaviour
 
     private void TeleportNearPlayer(bool near = true)
     {
-        if (!IsChasing) teleportsThisChase = 0;
-        else if (teleportsThisChase >= maxTeleportsPerChase)
-            return;
-
         float radius = near 
             ? Random.Range(teleportMinDistance, teleportMaxDistance)
             : Random.Range(teleportMinDistance, 14f);
@@ -275,19 +305,16 @@ public class SlenderManAI : MonoBehaviour
 
         Vector3 direction;
 
-        if (inView)
-        {
-            // Mantém dentro do FOV real (60° → metade = 30°)
+        if (inView) {
+            // Mantem dentro do FOV real (60° → metade = 30°)
             float angle = Random.Range(-25f, 25f);
             direction = Quaternion.Euler(0, angle, 0) * player.forward;
 
             // Se estiver muito longe, puxa mais pra perto pra garantir visibilidade
-            if (radius > 18f)
-                radius = Random.Range(12f, 18f);
+            if (radius > 18f) radius = Random.Range(12f, 18f);
         }
-        else
-        {
-            // Fora do FOV (laterais / atrás)
+        else {
+            // Fora do FOV (laterais / atras)
             float angle = Random.Range(70f, 180f) * (Random.value < 0.5f ? 1 : -1);
             direction = Quaternion.Euler(0, angle, 0) * player.forward;
         }
@@ -297,46 +324,66 @@ public class SlenderManAI : MonoBehaviour
 
         float teleportDistance = Vector3.Distance(randomPosition, player.position);
 
-        if ((teleportDistance < teleportMinDistance) || (IsChasing && (teleportDistance < DistanceToPlayer)))
-        {
-            teleportTimer = (teleportTrials < 5) ? teleportCooldown : 0;
-            adjustedCooldown = teleportCooldown;
-            teleportTrials++;
-
+        if ((teleportDistance < teleportMinDistance) || (IsChasing && (teleportDistance < DistanceToPlayer))) {
+            teleportTimer = AreBothPresent ? teleportHouseCooldown : teleportCooldown;
+            adjustedCooldown = AreBothPresent ? teleportHouseCooldown : teleportCooldown;
             #if UNITY_EDITOR
             Debug.Log("Abort Teleportation");
             #endif
         }
-        else
-        {
+        else {
             chaser.ResetSprint();
             transform.position = randomPosition;
-            teleportTrials = 0;
-
-            if (IsChasing) teleportsThisChase++;
             chaser.JumpscareHandler.ResetRealJumpscare();
-
+            presence.ForceExit();
+            Pathfind = null;
             #if UNITY_EDITOR
             Debug.Log($"Teleported | Dist: {teleportDistance:F1} | InView: {inView} | Bias: {bias:F2}");
             #endif
         }
     }
 
+    private void TeleportToHouse()
+    {
+        int randIndex = Random.Range(0, 32);
+        Collider randPlace = house.GetColliderByIndex(randIndex);
+        uint playerAdjs = house.GetAdjacentsByLevel(playerPresence.CurrentPlacement, 2);
+
+        if (house.IsIncluded(randPlace, playerAdjs)) {
+            teleportTimer = AreBothPresent ? teleportHouseCooldown : teleportCooldown;
+            adjustedCooldown = AreBothPresent ? teleportHouseCooldown : teleportCooldown;
+            #if UNITY_EDITOR
+            Debug.Log("Abort Teleportation");
+            #endif
+        }
+        else {
+            presence.ForceExit();
+            chaser.ResetSprint();
+            transform.position = new Vector3(
+                randPlace.transform.position.x, transform.position.y,
+                randPlace.transform.position.z);
+            chaser.JumpscareHandler.ResetRealJumpscare();
+            Pathfind = presence.GetRandomExplorationPath(randIndex);
+            #if UNITY_EDITOR
+            Debug.Log($"Teleported to the house at node #{randIndex}");
+            #endif
+        }
+    }
+
     private void TeleportToBaseSpot()
     {
-        if (transform.position != baseTeleportSpot) {
+        if (transform.position != baseTeleportSpot)
             transform.position = baseTeleportSpot;
-            // audioSource.Play();
-        }
+        presence.ForceExit();
+        Pathfind = null;
     }
 
     private void RotateTowardsPlayer()
     {
-        Vector3 directionToPlayer = player.position - transform.position;
+        Vector3 directionToPlayer = GetTarget - transform.position;
         directionToPlayer.y = 0f; // Ignore the vertical component
 
-        if (directionToPlayer != Vector3.zero)
-        {
+        if (directionToPlayer != Vector3.zero) {
             Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }

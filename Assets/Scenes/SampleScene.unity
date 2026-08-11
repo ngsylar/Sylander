@@ -3142,7 +3142,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f163130ff9603c048bd5f9fc01d4f345, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 87
+      value: 221.42796
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f163130ff9603c048bd5f9fc01d4f345, type: 3}
       propertyPath: m_LocalPosition.y
@@ -3150,7 +3150,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f163130ff9603c048bd5f9fc01d4f345, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 28
+      value: 34.65395
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f163130ff9603c048bd5f9fc01d4f345, type: 3}
       propertyPath: m_LocalRotation.w
@@ -4330,16 +4330,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee35ad28e06332a44b6708c499276464, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  presence: {fileID: 1638633182}
   chaser: {fileID: 854204197}
   mirage: {fileID: 251325013}
   player: {fileID: 2094627569}
+  playerPresence: {fileID: 2090841792}
   teleportMaxDistance: 10
   teleportMinDistance: 8
   teleportCooldown: 12
+  teleportHouseCooldown: 0
   teleportProbability: 0.02
   rotationSpeed: 50
-  maxTeleportsPerChase: 0
-  teleportSound: {fileID: 8300000, guid: fb97aacd7c793e346a44429ee8cb8ce1, type: 3}
+  firstCooldown: 120
   deathActivationRange: 2
   teleportTimer: 0
   lastSafePage: 5
@@ -7897,7 +7899,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1303036332
 Transform:
   m_ObjectHideFlags: 0
@@ -9648,6 +9650,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1638633181}
   - component: {fileID: 1638633180}
+  - component: {fileID: 1638633183}
+  - component: {fileID: 1638633182}
   m_Layer: 14
   m_Name: Presence
   m_TagString: Untagged
@@ -9691,6 +9695,47 @@ Transform:
   m_Children: []
   m_Father: {fileID: 854204195}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1638633182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1638633179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 608b2d6e49f7f31478743b14906e38ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  house: {fileID: 1678106999}
+  currentPlacement: {fileID: 0}
+--- !u!54 &1638633183
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1638633179}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &1656443114
 GameObject:
   m_ObjectHideFlags: 0
@@ -10217,10 +10262,6 @@ MonoBehaviour:
   - {fileID: 1997477306}
   - {fileID: 90783404}
   - {fileID: 872764144}
-  frente: {fileID: 277013001}
-  entrada: {fileID: 2093901512}
-  saida: {fileID: 441802098}
-  tras: {fileID: 1030568836}
 --- !u!1 &1679427942 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: b31f4027f9db604489243c60fac57600, type: 3}
@@ -11052,7 +11093,7 @@ MonoBehaviour:
   layerAlvo:
     serializedVersion: 2
     m_Bits: 8192
-  flashlight: {fileID: 0}
+  flashlight: {fileID: 2094627571}
   flashlightPyramid: {fileID: 1848996671}
 --- !u!1 &1857772500 stripped
 GameObject:
@@ -13197,7 +13238,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   house: {fileID: 1678106999}
   currentPlacement: {fileID: 0}
-  isPredator: 0
 --- !u!54 &2090841793
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -102,7 +102,8 @@ public class SlenderMirage : MonoBehaviour
         currentJumpTime -= Time.deltaTime;
         if (currentJumpTime > 0f) return;
         
-        if (Random.value <= jumpscareChance)
+        // essa condicao simploria se IsInside nao teleportar eh outra merda que deixo pra corrigir dps
+        if (Random.value <= jumpscareChance && !chaser.ai.playerPresence.IsInside)
             TeleportNearPlayer();
         else currentJumpTime = trialCooldown;
     }

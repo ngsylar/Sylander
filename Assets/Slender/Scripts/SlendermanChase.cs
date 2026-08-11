@@ -65,6 +65,20 @@ public class SlendermanChase : MonoBehaviour
         get => staticNoise.isPlaying;
     }
 
+    public bool AreBothInDetectionRange
+    {
+        get { 
+            HouseBuilding house = ai.presence.house;
+            bool bothOutside = !ai.playerPresence.IsInside && !ai.presence.IsInside;
+            bool bothInside = ai.playerPresence.IsInside && ai.presence.IsInside;
+            bool nearby = distanceToPlayer <= 5f
+                && house.IsIncluded(
+                    ai.presence.CurrentPlacement,
+                    house.GetAdjacentsByLevel(ai.playerPresence.CurrentPlacement, 2));
+            return bothOutside || (bothInside && nearby);
+        }
+    }
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -95,6 +109,7 @@ public class SlendermanChase : MonoBehaviour
 
             // Check if the player is within the detection radius
             isPlayerInRange = distanceToPlayer <= (isPlayerInRange ? escapeDistance : playerDetectionRadius);
+            isPlayerInRange = isPlayerInRange && AreBothInDetectionRange; // eh uma merda isso, dps corrijo
 
             // If the player is in range, move towards the player
             if (isPlayerInRange && !WasChasing) {
@@ -104,7 +119,44 @@ public class SlendermanChase : MonoBehaviour
                 inertia = false;
                 ResetSprint();
                 StartPostEscape();
-            } else SlowChase(distanceToPlayer);
+            } else if (ai.AreBothPresent)
+                SlowExploration();
+            else SlowChase();
+        }
+    }
+
+    void SlowExploration()
+    {
+        if (ai.Pathfind == null || ai.Pathfind.Count == 0) {
+            Collider currentPlacement = ai.presence.CurrentPlacement;
+            if (currentPlacement == null) return;
+            ai.Pathfind = ai.presence.GetRandomExplorationPath(ai.presence.CurrentPlaceIndex);
+        }
+        Collider collider = ai.presence.house.GetColliderByIndex(ai.Pathfind[0]);
+        Vector3 nextNode = collider.transform.position;
+
+        if (distanceToPlayer > killDistance) {
+            Vector3 direction = (nextNode - transform.position).normalized;
+            Vector3 move = superSlowSpeed * Time.deltaTime * direction;
+            move.y = 0;
+            controller.Move(move);
+            transform.LookAt(new Vector3(nextNode.x, transform.position.y, nextNode.z));
+            HandlePostEscape();
+
+            if (ai.presence.CurrentPlacement == collider)
+                ai.Pathfind.RemoveAt(0);
+        }
+    }
+
+    void SlowChase()
+    {
+        if (distanceToPlayer > killDistance) {
+            Vector3 direction = (player.position - transform.position).normalized;
+            Vector3 move = superSlowSpeed * Time.deltaTime * direction;
+            move.y = 0;
+            controller.Move(move);
+            transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
+            HandlePostEscape();
         }
     }
 
@@ -145,22 +197,12 @@ public class SlendermanChase : MonoBehaviour
         }
     }
 
-    void SlowChase(float distanceToPlayer)
-    {
-        if (distanceToPlayer > killDistance)
-        {
-            Vector3 direction = (player.position - transform.position).normalized;
-            Vector3 move = superSlowSpeed * Time.deltaTime * direction;
-            controller.Move(move);
-            transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
-            HandlePostEscape();
-        }
-    }
-
     void StartPostEscape()
     {
         postEscapeTimer = postEscapeSecurityTime;
         ai.StartPostEscapeTeleportCooldown();
+        if (ai.AreBothPresent)
+            ai.Pathfind = ai.presence.GetRandomExplorationPath(ai.presence.CurrentPlaceIndex);
     }
 
     void HandlePostEscape()
@@ -178,14 +220,14 @@ public class SlendermanChase : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Pyramid") && playerFlashlight.IsOn)
+        if (other.gameObject.CompareTag("Pyramid") && playerFlashlight.IsOn && AreBothInDetectionRange)
             jumpscareMgmt.MakeRealJumpscare();
     }
 
     void OnTriggerStay(Collider other)
     {
         if (other.gameObject.CompareTag("Pyramid")) {
-            if (playerFlashlight.IsOn) {
+            if (playerFlashlight.IsOn && AreBothInDetectionRange) {
                 float d = Mathf.InverseLerp(20f, 0f, distanceToPlayer);
                 playerFlashlight.gazeFactor = Mathf.Lerp(1f, 1.25f, d);
             } else playerFlashlight.gazeFactor = 1f;

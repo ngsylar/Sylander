@@ -181,14 +181,14 @@ public class HouseBuilding : MonoBehaviour
 
     public uint GetAdjacentsByLevel(int index, int level)
     {
-        if (level < 0) return 0u;
+        if (index < 0 || level < 0) return 0u;
         if (level >= MAX_LEVELS) level = MAX_LEVELS - 1;
         return _lut[index, level];
     }
 
     public uint GetAdjacentsByLevel(Collider collider, int level)
     {
-        if (level < 0) return 0u;
+        if (collider == null || level < 0) return 0u;
         if (level >= MAX_LEVELS) level = MAX_LEVELS - 1;
         int index = nodes.IndexOf(collider);
         return _lut[index, level];
