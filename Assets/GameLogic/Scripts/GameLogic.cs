@@ -10,6 +10,7 @@ public class GameLogic : MonoBehaviour
     public PauseMenu pauseMenu;
     public BackgroundMgmt bgMusic;
 
+    public GameObject player;
     public PresenceDetector playerPresence;
     public Flashlight flashlight;
 
@@ -63,6 +64,7 @@ public class GameLogic : MonoBehaviour
     {
         pageCount++;
         UpdateUI();
+        BeatTheGame();
         bgMusic.UpdateMusic(pageCount);
     }
 
@@ -173,5 +175,14 @@ public class GameLogic : MonoBehaviour
     public void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    void BeatTheGame()
+    {
+        if (pageCount == 8) {
+            GlobalLogic.playerPosition = player.transform.position;
+            GlobalLogic.playerRotation = player.transform.rotation;
+            SceneManager.LoadScene("YouWon");
+        }
     }
 }

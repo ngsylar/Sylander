@@ -185,12 +185,6 @@ public class SlenderManAI : MonoBehaviour
         // Clamp de segurança
         pageCount = Mathf.Clamp(pageCount, 0, 8);
 
-        if (pageCount == 8)
-        {
-            // SceneManager.LoadScene(0);
-            return;
-        }
-
         // Normaliza progressão (0 → 1 entre 0 e 7 páginas)
         float t = pageCount / 7f;
 
@@ -221,6 +215,9 @@ public class SlenderManAI : MonoBehaviour
         ChaseSprintDuration = Mathf.Lerp(3f, 1.5f, curve);
 
         // --- AJUSTES POR MARCOS IMPORTANTES ---
+
+        if (pageCount == 1) // Acaba com a brincadeira de crianca
+            teleportTimer = adjustedCooldown - teleportCooldown;
 
         if (pageCount >= 3) // Começa a ficar mais presente
             teleportProbability += 0.05f;
