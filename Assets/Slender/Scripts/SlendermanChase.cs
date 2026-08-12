@@ -25,6 +25,7 @@ public class SlendermanChase : MonoBehaviour
 
     private Vector3 currentDirection;
     private bool inertia = false;
+    private bool permitJumpscare = false;
 
     [Header("Post Escape")]
     [SerializeField] private float postEscapeSecurityTime = 3f;
@@ -239,14 +240,20 @@ public class SlendermanChase : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Pyramid") && playerFlashlight.IsOn && AreBothInSameRoom)
-            jumpscareMgmt.MakeRealJumpscare();
+        if (other.gameObject.CompareTag("Pyramid"))
+            permitJumpscare = true;
     }
 
     void OnTriggerStay(Collider other)
     {
         if (other.gameObject.CompareTag("Pyramid")) {
-            // eu poderia usar AreBothInSameRoom, mas vou dar esse colher de cha para o jogador
+            if (permitJumpscare && playerFlashlight.IsOn) {
+                float jumpDistance = Mathf.Lerp(10f, 20f, playerFlashlight.CurrentBattery);
+                if ((distanceToPlayer <= jumpDistance) && AreBothInSameRoom) {
+                    jumpscareMgmt.MakeRealJumpscare();
+                    permitJumpscare = false;
+                }
+            } // eu poderia usar AreBothInSameRoom aqui, mas vou dar essa colher de cha para o jogador
             if (playerFlashlight.IsOn && AreBothInDetectionRange) {
                 float d = Mathf.InverseLerp(20f, 0f, distanceToPlayer);
                 playerFlashlight.gazeFactor = Mathf.Lerp(1f, 1.25f, d);
@@ -256,7 +263,9 @@ public class SlendermanChase : MonoBehaviour
 
     void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.CompareTag("Pyramid"))
+        if (other.gameObject.CompareTag("Pyramid")) {
             playerFlashlight.gazeFactor = 1f;
+            permitJumpscare = false;
+        }
     }
 }

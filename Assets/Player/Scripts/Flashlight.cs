@@ -44,7 +44,7 @@ public class Flashlight : MonoBehaviour
 
     public float batteryMinutes;
     private float batterySeconds;
-    private float elapsedSeconds;
+    [SerializeField] private float elapsedSeconds;
 
     [SerializeField]
     private float slendermanDrainFactor; // 1.75f
@@ -71,6 +71,11 @@ public class Flashlight : MonoBehaviour
     public bool IsOn
     {
         get => on;
+    }
+
+    public float CurrentBattery
+    {
+        get => currentBattery;
     }
 
     public bool IsPaused
