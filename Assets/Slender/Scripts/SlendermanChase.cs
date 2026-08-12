@@ -246,6 +246,7 @@ public class SlendermanChase : MonoBehaviour
     void OnTriggerStay(Collider other)
     {
         if (other.gameObject.CompareTag("Pyramid")) {
+            // eu poderia usar AreBothInSameRoom, mas vou dar esse colher de cha para o jogador
             if (playerFlashlight.IsOn && AreBothInDetectionRange) {
                 float d = Mathf.InverseLerp(20f, 0f, distanceToPlayer);
                 playerFlashlight.gazeFactor = Mathf.Lerp(1f, 1.25f, d);
