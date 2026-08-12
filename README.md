@@ -1,14 +1,11 @@
 
-<h1 align="center">Slenderman 2.0</h1>
+<h1 align="center">Sylander.Man</h1>
 
-
-<h2 align="center">Project Demo</h2>
 <p align="center">
   <a href="https://www.youtube.com/watch?v=qeuFMNZoxDI" target="_blank" rel="noopener noreferrer">
     <img src="https://i.postimg.cc/sxD8cN4H/Untitled-design-1.png" alt="Project Demo" width="600">
   </a>
 </p>
-
 
 <h2>Table of Contents</h2>
 <ul>
@@ -17,28 +14,27 @@
   <li><a href="#installation">Installation</a></li>
   <li><a href="#how-to-play">How to Play</a></li>
   <li><a href="#controls">Controls</a></li>
-  <li><a href="#contact">Contact</a></li>
+  <li><a href="#contact">Info</a></li>
 </ul>
 
 <h2 id="introduction">Introduction</h2>
 <p>
-  "Slenderman 2.0" is a first-person horror game inspired by the infamous Slenderman myth. Players are tasked with navigating through a dark, eerie forest to collect pages while avoiding the haunting presence of Slenderman.
+  "Sylander.Man" is a first-person horror game inspired by the infamous Slender myth. Players are tasked with navigating through a dark, eerie forest to collect pages while avoiding the haunting presence of Slenderman.
 </p>
 
 <h2 id="features">Features</h2>
 <ul>
-  <li><strong>Immersive Atmosphere:</strong> Experience a dark and creepy environment with high-quality graphics and sound.</li>
-  <li><strong>Challenging Gameplay:</strong> Find all the hidden pages before Slenderman catches you.</li>
-  <li><strong>Randomized Elements:</strong> Each playthrough is unique with randomized Slenderman behavior.</li>
+  <li><strong>Immersive Atmosphere:</strong> Experience a dark and creepy environment with low-quality graphics and sound.</li>
+  <li><strong>Challenging Gameplay:</strong> Find all the hidden pages before Sylander Man catches you.</li>
+  <li><strong>Randomized Elements:</strong> Each playthrough is unique with randomized Sylander behavior.</li>
 </ul>
-
 
 <h2 id="installation">Installation</h2>
 <ol>
   <li><strong>Clone the Repository:</strong></li>
-  <pre><code>https://github.com/MubeenNaushad/Slenderman-Clone.git</code></pre>
+  <pre><code>https://github.com/ngsylar/Sylander.git</code></pre>
   <li><strong>Navigate to the Project Directory:</strong></li>
-  <pre><code>cd Slenderman-Clone</code></pre>
+  <pre><code>cd Sylander</code></pre>
   <li><strong>Install Dependencies:</strong></li>
   <pre><code>
   For Unity
@@ -53,13 +49,12 @@
 
 <h2 id="how-to-play">How to Play</h2>
 <ol>
-  <li><strong>Objective:</strong> Find all the pages scattered throughout the forest while avoiding Slenderman.</li>
-  <li><strong>Movement:</strong> Use <code>W</code>, <code>A</code>, <code>S</code>, <code>D</code> keys to move around and <code>F</code> to open flashlight.</li>
+  <li><strong>Objective:</strong> Find all the pages scattered throughout the forest while avoiding Sylander Man.</li>
+  <li><strong>Movement:</strong> Use <code>W</code>, <code>A</code>, <code>S</code>, <code>D</code> keys to move around and <code>Mouse Left Button</code> to turn on the flashlight.</li>
   <li><strong>Look Around:</strong> Use your mouse to look around.</li>
-  <li><strong>Collect Pages:</strong> Approach a page and press <code>E</code> to collect it.</li>
-  <li><strong>Avoid Slenderman:</strong> Do not look at Slenderman for too long; if he gets too close, you will lose.</li>
+  <li><strong>Collect Pages:</strong> Approach a page and press <code>Space</code> to collect it.</li>
+  <li><strong>Avoid Sylander:</strong> Do not look at Sylander Man for too long; if he gets too close, you will lose.</li>
 </ol>
-
 
 <h2 id="controls">Controls</h2>
 <ul>
@@ -67,17 +62,17 @@
   <li><code>A</code>: Move Left</li>
   <li><code>S</code>: Move Backward</li>
   <li><code>D</code>: Move Right</li>
-  <li><code>F</code>: Flashlight</li>
+  <li><code>Mouse Left Button</code>: Turn On/Off Flashlight</li>
   <li>Mouse: Look Around</li>
-  <li><code>E</code>: Interact/Collect Page</li>
+  <li><code>Space</code>: Interact/Collect Page</li>
   <li><code>Shift</code>: Sprint</li>
   <li><code>Esc</code>: Pause/Menu</li>
 </ul>
 
-<h2 id="contact">Contact</h2>
+<h2 id="contact">Info</h2>
 <p>
-  <strong>Author:</strong> Mubeen Naushad<br>
-  <strong>Email:</strong> <a href="mailto:mubeennaushad@gmail.com">mubeennaushad@gmail.com</a><br>
-  <strong>Linkedin:</strong> <a href="https://linkedin.com/in/mubeen-naushad">@MubeenNaushad</a><br>
-  <strong>GitHub:</strong> <a href="https://github.com/mubeennaushad">Mubeen Naushad</a>
+  Latest version developed by <strong>Gabriel Fontenelle</strong><br>
+  Forked from <a href="https://github.com/MubeenNaushad/Slenderman-Clone">MubeenNaushad/Slenderman-Clone</a><br>
+  Original version developed by <strong>Mubeen Naushad</strong><br>
+  Original Game "Slender: The Eight Pages" developed by <strong>Parsec Productions</strong>
 </p>
