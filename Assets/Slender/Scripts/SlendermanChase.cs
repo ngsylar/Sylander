@@ -65,6 +65,25 @@ public class SlendermanChase : MonoBehaviour
         get => staticNoise.isPlaying;
     }
 
+    public bool AreBothInSameRoom
+    {
+        get {
+            HouseBuilding house = ai.presence.house;
+            bool bothOutside = !ai.playerPresence.IsInside && !ai.presence.IsInside;
+            bool bothPresent = ai.playerPresence.IsPresent && ai.presence.IsPresent;
+            if (bothOutside) return true;
+            Collider playerPlacement = ai.playerPresence.CurrentPlacement;
+            Collider placement = ai.presence.CurrentPlacement;
+            return bothOutside || (bothPresent && (
+                house.frontDoor.IncludesBoth(playerPlacement, placement)
+                || house.hallway.IncludesBoth(playerPlacement, placement)
+                || house.betweenRooms.IncludesBoth(playerPlacement, placement)
+                || house.leftRoom.IncludesBoth(playerPlacement, placement)
+                || house.rightRoom.IncludesBoth(playerPlacement, placement)
+                || house.backDoor.IncludesBoth(playerPlacement, placement)));
+        }
+    }
+
     public bool AreBothInDetectionRange
     {
         get { 
@@ -220,7 +239,7 @@ public class SlendermanChase : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Pyramid") && playerFlashlight.IsOn && AreBothInDetectionRange)
+        if (other.gameObject.CompareTag("Pyramid") && playerFlashlight.IsOn && AreBothInSameRoom)
             jumpscareMgmt.MakeRealJumpscare();
     }
 

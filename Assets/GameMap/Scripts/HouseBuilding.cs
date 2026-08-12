@@ -20,6 +20,13 @@ public class HouseBuilding : MonoBehaviour
     public HousePlace outside { get; private set; }
     public HousePlace inside { get; private set; }
 
+    public HousePlace frontDoor { get; private set; }
+    public HousePlace backDoor { get; private set; }
+    public HousePlace hallway { get; private set; }
+    public HousePlace betweenRooms { get; private set; }
+    public HousePlace leftRoom { get; private set; }
+    public HousePlace rightRoom { get; private set; }
+
     private uint[,] _lut;
 
     private void SetupConstants()
@@ -60,15 +67,20 @@ public class HouseBuilding : MonoBehaviour
             0b00000000000000000000000000000101u, // 30 de4
             0b00000000000000000000000000000010u  // 31 de5
         };
-        //                    0         1         2         3
-        //                    01234567890123456789012345678901
-        outside = new(this, 0b10000100000000000000000000000000u);
-        inside  = new(this, 0b01111011111111111111111111111111u);
-
         front = nodes[0];
         entrance = nodes[1];
         exit = nodes[4];
         back = nodes[5];
+        //                         0         1         2         3
+        //                         01234567890123456789012345678901
+        outside      = new(this, 0b10000100000000000000000000000000u);
+        inside       = new(this, 0b01111011111111111111111111111111u);
+        frontDoor    = new(this, 0b11000000000000000000000000000000u);
+        backDoor     = new(this, 0b00001100000000000000000000000000u);
+        hallway      = new(this, 0b01111000000000000000000000000000u);
+        betweenRooms = new(this, 0b00100011000000000001100000000000u);
+        leftRoom     = new(this, 0b00000001100001100000000000000000u);
+        rightRoom    = new(this, 0b00000000000000000000110000110000u);
     }
 
     private void MakeLookUpTable()
@@ -213,6 +225,19 @@ public class HouseBuilding : MonoBehaviour
         {
             uint colliderMask = house.GetMaskByCollider(collider);
             return (mask & colliderMask) > 0u;
+        }
+
+        public bool IncludesBoth (int a, int b)
+        {
+            return ((house.IndexToMask(a) & mask) > 0u)
+                && ((house.IndexToMask(b) & mask) > 0u);
+        }
+
+        public bool IncludesBoth (Collider a, Collider b)
+        {
+            uint aMask = house.GetMaskByCollider(a);
+            uint bMask = house.GetMaskByCollider(b);
+            return ((mask & aMask) > 0u) && ((mask & bMask) > 0u);
         }
     }
 }

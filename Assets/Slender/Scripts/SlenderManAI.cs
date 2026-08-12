@@ -109,7 +109,7 @@ public class SlenderManAI : MonoBehaviour
     public bool AreBothInSamePlace
     {
         get => (!playerPresence.IsInside && !presence.IsInside)
-            || (playerPresence.IsInside && presence.IsPresent);
+            || (playerPresence.IsPresent && presence.IsPresent);
     }
 
     public bool AreBothClose
