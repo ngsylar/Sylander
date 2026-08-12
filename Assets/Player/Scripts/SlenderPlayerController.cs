@@ -42,6 +42,11 @@ public class SlenderPlayerController : MonoBehaviour
     [SerializeField] private float mapLimitZ;
     [SerializeField] private float mapOffsetZ;
 
+    public CharacterController CC
+    {
+        get => characterController;
+    }
+
     public bool IsPaused
     {
         get => isPaused;

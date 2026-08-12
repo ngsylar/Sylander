@@ -367,7 +367,7 @@ public class SlenderManAI : MonoBehaviour
         }
     }
 
-    private void TeleportToBaseSpot()
+    public void TeleportToBaseSpot()
     {
         if (transform.position != baseTeleportSpot)
             transform.position = baseTeleportSpot;
