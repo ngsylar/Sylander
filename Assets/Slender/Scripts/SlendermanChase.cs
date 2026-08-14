@@ -17,8 +17,11 @@ public class SlendermanChase : MonoBehaviour
     public float superSlowSpeed; // 0.5f
 
     public Transform player;             // Reference to the player's transform
+    public Transform playerCamera;
     public Flashlight playerFlashlight;
     [SerializeField, ReadOnly] private float distanceToPlayer = 999f;
+    public Transform rayLeft;
+    public Transform rayRight;
 
     private CharacterController controller; // Reference to the CharacterController component
     private bool isPlayerInRange = false;
@@ -180,6 +183,36 @@ public class SlendermanChase : MonoBehaviour
         }
     }
 
+    void HandleJumpscare()
+    {
+        if (!permitJumpscare || !playerFlashlight.IsOn) return;
+        float jumpDistance = Mathf.Lerp(10f, 20f, playerFlashlight.CurrentBattery);
+        if ((distanceToPlayer > jumpDistance) || !AreBothInSameRoom) return;
+
+        QueryTriggerInteraction ign = QueryTriggerInteraction.Ignore;
+        Vector3 src = playerCamera.position + new Vector3(0f, 0f, 4.2f);
+        Vector3 l = rayLeft.position - src;
+        Vector3 r = rayRight.position - src;
+
+        if ((Physics.Raycast(src, l.normalized, out RaycastHit hitLeft, l.magnitude, ~0, ign)
+            && (hitLeft.collider.gameObject == gameObject)) 
+            || (Physics.Raycast(src, r.normalized, out RaycastHit hitRight, r.magnitude, ~0, ign)
+            && (hitRight.collider.gameObject == gameObject))) {
+            
+            permitJumpscare = false;
+            jumpscareMgmt.MakeJumpscare();
+        }
+    }
+
+    void HandleGazeEffect()
+    {
+        // eu poderia usar AreBothInSameRoom aqui, mas vou dar essa colher de cha para o jogador
+        if (playerFlashlight.IsOn && AreBothInDetectionRange) {
+            float d = Mathf.InverseLerp(20f, 0f, distanceToPlayer);
+            playerFlashlight.gazeFactor = Mathf.Lerp(1f, 1.25f, d);
+        } else playerFlashlight.gazeFactor = 1f;
+    }
+
     public void ResetSprint ()
     {
         chaseSprintTime = 0f;
@@ -247,17 +280,8 @@ public class SlendermanChase : MonoBehaviour
     void OnTriggerStay(Collider other)
     {
         if (other.gameObject.CompareTag("Pyramid")) {
-            if (permitJumpscare && playerFlashlight.IsOn) {
-                float jumpDistance = Mathf.Lerp(10f, 20f, playerFlashlight.CurrentBattery);
-                if ((distanceToPlayer <= jumpDistance) && AreBothInSameRoom) {
-                    jumpscareMgmt.MakeRealJumpscare();
-                    permitJumpscare = false;
-                }
-            } // eu poderia usar AreBothInSameRoom aqui, mas vou dar essa colher de cha para o jogador
-            if (playerFlashlight.IsOn && AreBothInDetectionRange) {
-                float d = Mathf.InverseLerp(20f, 0f, distanceToPlayer);
-                playerFlashlight.gazeFactor = Mathf.Lerp(1f, 1.25f, d);
-            } else playerFlashlight.gazeFactor = 1f;
+            HandleJumpscare();
+            HandleGazeEffect();
         }
     }
 

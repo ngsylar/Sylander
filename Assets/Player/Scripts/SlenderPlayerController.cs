@@ -63,26 +63,14 @@ public class SlenderPlayerController : MonoBehaviour
         currentStamina = staminaSeconds;
         currentStaminaCooldown = 0f;
         staminaRegenerateRate = staminaSeconds / staminaRegenSeconds;
-
-        #if UNITY_EDITOR
-        if (flashlight.DebugMode) {
-            staminaCooldown = 0.5f;
-            staminaRegenSeconds = 0.25f;
-            walkSpeed = 5.2f;
-            runSpeed = 10f;
-            staminaRegenerateRate = staminaSeconds / staminaRegenSeconds;
-        }
-        #endif
     }
 
     void Update()
     {
+        if (isPaused) return;
+
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
-
-        bool isTryingToRun = Input.GetKey(KeyCode.LeftShift);
-        bool isRunning = isTryingToRun && (currentStamina > 0f);
-        HandleStamina(isTryingToRun, isRunning);
 
         float inputZ = Input.GetAxis("Vertical");
         float inputX = Input.GetAxis("Horizontal");
@@ -91,6 +79,12 @@ public class SlenderPlayerController : MonoBehaviour
         // Normaliza só se magnitude > 1 (evita custo desnecessário)
         if (inputDirection.magnitude > 1f)
             inputDirection.Normalize();
+
+        bool isMoving = (inputZ != 0f) || (inputX != 0f);
+        bool isPanting = Input.GetKeyUp(KeyCode.LeftShift);
+        bool isTryingToRun = Input.GetKey(KeyCode.LeftShift);
+        bool isRunning = isTryingToRun && (currentStamina > 0f);
+        HandleStamina(isMoving, isPanting, isTryingToRun, isRunning);
 
         float speed = canMove ? (isRunning ? runSpeed : walkSpeed) : 0f;
         float movementDirectionY = moveDirection.y;
@@ -105,7 +99,7 @@ public class SlenderPlayerController : MonoBehaviour
         }
         characterController.Move(moveDirection * Time.deltaTime);
 
-        if (!isPaused && canMove) {
+        if (canMove) {
             rotationX -= Input.GetAxis("Mouse Y") * lookSpeed;
             rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
             playerCam.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
@@ -114,17 +108,19 @@ public class SlenderPlayerController : MonoBehaviour
         // HandleZoom();
     }
 
-    void HandleStamina(bool isTryingToRun, bool isRunning)
+    void HandleStamina(bool isMoving, bool isPanting, bool isTryingToRun, bool isRunning)
     {
-        if (isRunning) {
-            currentStamina -= Time.deltaTime;
+        if (isMoving && (isRunning || isPanting)) {
+            // essa eh uma solucao muito safada, o ideial é que a stamina recarregue mais lento que o quanto gasta, porem dane-se
+            currentStamina -= isPanting ? 1.5f : Time.deltaTime;
             if (currentStamina <= 0f) {
                 currentStamina = 0f;
                 currentStaminaCooldown = staminaCooldown; // só existe se zerar
                 breath.Play();
                 
                 #if UNITY_EDITOR
-                Debug.Log($"Stamina ended at a distance of {chaser.DistanceToPlayer:F2}");
+                if (chaser != null)
+                    Debug.Log($"Stamina ended at a distance of {chaser.DistanceToPlayer:F2}");
                 #endif
             }
         } else {

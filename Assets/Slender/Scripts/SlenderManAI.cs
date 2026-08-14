@@ -9,7 +9,6 @@ public class SlenderManAI : MonoBehaviour
     private HouseBuilding house;
     public PresenceHunter presence;
     public SlendermanChase chaser;
-    public SlenderMirage mirage;
 
     public Transform player; // Reference to the player's GameObject
     public PresenceDetector playerPresence;
@@ -331,7 +330,7 @@ public class SlenderManAI : MonoBehaviour
         else {
             chaser.ResetSprint();
             transform.position = randomPosition;
-            chaser.JumpscareHandler.ResetRealJumpscare();
+            chaser.JumpscareHandler.ResetJumpscare();
             presence.ForceExit();
             Pathfind = null;
             #if UNITY_EDITOR
@@ -359,7 +358,7 @@ public class SlenderManAI : MonoBehaviour
             transform.position = new Vector3(
                 randPlace.transform.position.x, transform.position.y,
                 randPlace.transform.position.z);
-            chaser.JumpscareHandler.ResetRealJumpscare();
+            chaser.JumpscareHandler.ResetJumpscare();
             Pathfind = presence.GetRandomExplorationPath(randIndex);
             #if UNITY_EDITOR
             Debug.Log($"Teleported to the house at node #{randIndex}");

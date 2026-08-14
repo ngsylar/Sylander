@@ -110,8 +110,6 @@ public class GameLogic : MonoBehaviour
             videoPlayer.clip = staticVideo;
             videoPlayer.SetDirectAudioMute(0, true); // Mute audio for static video
             videoPlayer.Play();
-
-            // Reset the scale of the static object for the static video
             staticObject.transform.localScale = new Vector3(1f, 1f, 1f); // Adjust as needed
         }
         float t = Mathf.InverseLerp(interferenceMin, interferenceMax, distanceToPlayer);
@@ -131,9 +129,6 @@ public class GameLogic : MonoBehaviour
             staticRenderer.material = deathMaterial;
             videoPlayer.SetDirectAudioMute(0, false); // Unmute audio
             videoPlayer.Play();
-
-            // Adjust the scale of the static object for the death video
-            staticObject.transform.localScale = new Vector3(1.28f, 0.72f, 1f);
             if (screamNoise) bgMusic.PlayScreamSound();
             flashlight.Restart();
         }

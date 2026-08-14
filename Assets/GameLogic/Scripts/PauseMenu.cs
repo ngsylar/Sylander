@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement; // Required for scene management
 
 public class PauseMenu : MonoBehaviour
 {
+    public GameObject gameStartUI;
     public GameObject pauseMenuUI; // Reference to the pause menu UI GameObject
     public Button exitButton; // Reference to the exit button in the pause menu
 
@@ -16,6 +17,9 @@ public class PauseMenu : MonoBehaviour
     public SlenderPlayerController playerController; // Reference to the player's controller
     public Flashlight flashlight;
     public Footsteps footsteps;
+    public AudioSource breath;
+
+    private bool breathIsPaused = false;
 
     public bool IsPaused
     {
@@ -26,27 +30,19 @@ public class PauseMenu : MonoBehaviour
     {
         // Add a listener to the exit and restart button
         exitButton.onClick.AddListener(QuitGame);
-        restartButton.onClick.AddListener(RestartGame);
+        if (restartButton != null) restartButton.onClick.AddListener(RestartGame);
         backToMainMenuButton.onClick.AddListener(LoadMainMenu);
     }
 
     void Update()
     {
-        // Check if Escape key is pressed
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            // Toggle pause state
-            isPaused = !isPaused;
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            if (gameStartUI != null && gameStartUI.activeSelf)
+                return;
 
-            // Activate/deactivate pause menu
-            if (isPaused)
-            {
-                PauseGame();
-            }
-            else
-            {
-                ResumeGame();
-            }
+            isPaused = !isPaused;
+            if (isPaused) PauseGame();
+            else ResumeGame();
         }
     }
 
@@ -64,9 +60,13 @@ public class PauseMenu : MonoBehaviour
 
         // Freeze the player's movement
         playerController.IsPaused = true;
-        flashlight.IsPaused = true;
+        if (flashlight != null) flashlight.IsPaused = true;
         footsteps.IsPaused = true;
 
+        if (breath.isPlaying) {
+            breath.Pause();
+            breathIsPaused = true;
+        }
         // Optional: Disable any other scripts that should not run while paused
         // Example: Disable player movement scripts, etc.
     }
@@ -85,9 +85,13 @@ public class PauseMenu : MonoBehaviour
 
         // Free the player's movement
         playerController.IsPaused = false;
-        flashlight.IsPaused = false;
+        if (flashlight != null) flashlight.IsPaused = false;
         footsteps.IsPaused = false;
 
+        if (breathIsPaused) {
+            breath.Play();
+            breathIsPaused = false;
+        }
         // Re-enable any scripts disabled when paused
     }
 
@@ -106,14 +110,13 @@ public class PauseMenu : MonoBehaviour
     {
         // Reload the current scene (restart the game)
         Time.timeScale = 1f;
-        Scene currentScene = SceneManager.GetActiveScene();
-        SceneManager.LoadScene(currentScene.buildIndex);
+        SceneManager.LoadScene("GameTrial");
     }
 
     public void LoadMainMenu()
     {
         // Load the main menu scene (assuming it's at build index 0)
         Time.timeScale = 1f;
-        SceneManager.LoadScene(0);
+        SceneManager.LoadScene("StartMenu");
     }
 }

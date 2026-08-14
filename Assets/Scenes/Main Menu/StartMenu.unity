@@ -5552,7 +5552,7 @@ MonoBehaviour:
   options: {fileID: 752667253}
   credits: {fileID: 1076136138}
   loading: {fileID: 1309335038}
-  gameSceneName: SAMPLEScene
+  gameSceneName: GameTrial
 --- !u!114 &1416421049
 MonoBehaviour:
   m_ObjectHideFlags: 0

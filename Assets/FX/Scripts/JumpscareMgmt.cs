@@ -8,18 +8,18 @@ public class JumpscareMgmt : MonoBehaviour
     [SerializeField, ReadOnly] private bool isPlaying;
     [SerializeField, ReadOnly] private bool soundPlayed;
     
-    [SerializeField] private float realJumpscareCooldown;
+    [SerializeField] private float jumpscareCooldown = 30f;
     [SerializeField, ReadOnly] private float elapsedTime;
 
     void Start()
     {
         Restart();
-        ResetRealJumpscare();
+        ResetJumpscare();
     }
 
     void Update()
     {
-        if (elapsedTime < realJumpscareCooldown)
+        if (elapsedTime < jumpscareCooldown)
             elapsedTime += Time.deltaTime;
 
         if (soundPlayed) return;
@@ -48,23 +48,15 @@ public class JumpscareMgmt : MonoBehaviour
         soundPlayed = false;
     }
 
-    public void MakeJumpscare(SlenderMirage mirage)
-    {
-        if (!isPlaying && !soundPlayed) {
-            mirage.StartStaticVideo();
-            audioSource.Play();
-        }
-    }
-
     // dar reset sempre que slender teleportar
-    public void ResetRealJumpscare()
+    public void ResetJumpscare()
     {
-        elapsedTime = realJumpscareCooldown;
+        elapsedTime = jumpscareCooldown;
     }
 
-    public void MakeRealJumpscare()
+    public void MakeJumpscare()
     {
-        if (!audioSource.isPlaying && elapsedTime >= realJumpscareCooldown) {
+        if (!audioSource.isPlaying && elapsedTime >= jumpscareCooldown) {
             SortSound();
             audioSource.Play();
         }

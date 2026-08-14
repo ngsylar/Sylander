@@ -4,11 +4,10 @@ using UnityEngine;
 public class Flashlight : MonoBehaviour
 {
     public GameLogic gameLogic;
+
     public SlenderManAI slenderman;
     public GameObject slendermetal0;
     public GameObject slendermetal1;
-    public GameObject slendermirage0;
-    public GameObject slendermirage1;
 
     public GameObject flashlight;
     private Light lightComp;
@@ -60,12 +59,6 @@ public class Flashlight : MonoBehaviour
     [SerializeField, ReadOnly]
     private float flickTimer = 0f;
 
-    [SerializeField]
-    private bool debugMode;
-
-    [SerializeField]
-    private float worldLightDebug;
-
     private float batteryTimer = 0f;
 
     public bool IsOn
@@ -84,11 +77,6 @@ public class Flashlight : MonoBehaviour
         set => isPaused = value;
     }
 
-    public bool DebugMode
-    {
-        get => debugMode;
-    }
-
     void Start()
     {
         lightComp = flashlight.GetComponent<Light>();
@@ -97,14 +85,6 @@ public class Flashlight : MonoBehaviour
         flashlight.SetActive(false);
 
         SetupFlashlight();
-        
-        #if UNITY_EDITOR
-        if (debugMode) {
-            RenderSettings.ambientLight = new Color(worldLightDebug, worldLightDebug, worldLightDebug);
-            RenderSettings.fogDensity = 0f;
-            TurnMetal0();
-        }
-        #endif
     }
 
     void SetupFlashlight()
@@ -123,10 +103,6 @@ public class Flashlight : MonoBehaviour
 
     void Update()
     {
-        #if UNITY_EDITOR
-        if (debugMode) return;
-        #endif
-
         if (isPaused || gameLogic.IsDead) return;
 
         if (off && Input.GetButtonDown("flashlight") && !isFlicking) {
@@ -281,15 +257,11 @@ public class Flashlight : MonoBehaviour
     {
         slendermetal0.SetActive(true);
         slendermetal1.SetActive(false);
-        slendermirage0.SetActive(true);
-        slendermirage1.SetActive(false);
     }
 
     void TurnMetal1()
     {
         slendermetal0.SetActive(false);
         slendermetal1.SetActive(true);
-        slendermirage0.SetActive(false);
-        slendermirage1.SetActive(true);
     }
 }

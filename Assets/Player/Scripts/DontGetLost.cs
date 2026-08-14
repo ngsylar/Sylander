@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class DontGetLost : MonoBehaviour
 {
+    public GameLogic gameLogic;
     public SlenderPlayerController player;
     public Transform playerTarget;
     public Flashlight flashlight;
@@ -24,6 +25,7 @@ public class DontGetLost : MonoBehaviour
     void Update()
     {
         if (stoped || paused) return;
+        if (gameLogic.pageCount == 0) return;
         timer += Time.deltaTime;
         if (slender.IsChasing) return;
         if (timer > chosenTime)
