@@ -81,10 +81,10 @@ public class SlenderPlayerController : MonoBehaviour
             inputDirection.Normalize();
 
         bool isMoving = (inputZ != 0f) || (inputX != 0f);
-        bool isPanting = Input.GetKeyUp(KeyCode.LeftShift);
         bool isTryingToRun = Input.GetKey(KeyCode.LeftShift);
         bool isRunning = isTryingToRun && (currentStamina > 0f);
-        HandleStamina(isMoving, isPanting, isTryingToRun, isRunning);
+        bool isPanting = Input.GetKeyUp(KeyCode.LeftShift) && (currentStamina > 0f);
+        HandleStamina(isMoving, isTryingToRun, isRunning, isPanting);
 
         float speed = canMove ? (isRunning ? runSpeed : walkSpeed) : 0f;
         float movementDirectionY = moveDirection.y;
@@ -108,7 +108,7 @@ public class SlenderPlayerController : MonoBehaviour
         // HandleZoom();
     }
 
-    void HandleStamina(bool isMoving, bool isPanting, bool isTryingToRun, bool isRunning)
+    void HandleStamina(bool isMoving, bool isTryingToRun, bool isRunning, bool isPanting)
     {
         if (isMoving && (isRunning || isPanting)) {
             // essa eh uma solucao muito safada, o ideial é que a stamina recarregue mais lento que o quanto gasta, porem dane-se
